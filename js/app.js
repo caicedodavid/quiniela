@@ -13,8 +13,7 @@ window._parserModule = { computeStandings };
 const MASTER_PATH = 'data/master.xlsx';
 const MANIFEST_PATH = 'data/manifest.json';
 
-let masterData = null;        // cached after first load
-let playerCache = {};         // file → parsed data
+let playerCache = {};         // file → parsed data (player files don't change)
 let players = [];             // [{ file, displayName, totalPoints }]
 let activeFile = null;
 
@@ -40,9 +39,6 @@ async function init() {
   renderSidebar(players, null);
   renderWelcome();
 
-  // Load master once in background
-  masterData = await loadMaster();
-
   // Wire up player buttons
   document.getElementById('player-list').addEventListener('click', e => {
     const btn = e.target.closest('.player-btn');
@@ -50,10 +46,11 @@ async function init() {
   });
 }
 
-// ── Master file ───────────────────────────────────────────────────────────────
+// ── Master file — always fetched fresh, never cached ────────────────────────
 async function loadMaster() {
   try {
-    const res = await fetch(MASTER_PATH);
+    // Cache-bust so the browser never serves a stale Excel mid-edit
+    const res = await fetch(`${MASTER_PATH}?t=${Date.now()}`);
     if (!res.ok) throw new Error(`master.xlsx: ${res.status}`);
     const buf = await res.arrayBuffer();
     return parseWorkbook(buf, 'master');
@@ -65,7 +62,7 @@ async function loadMaster() {
 
 // ── Player selection ──────────────────────────────────────────────────────────
 async function selectPlayer(file) {
-  if (activeFile === file) return;
+  // Allow re-clicking the same player to force a refresh
   activeFile = file;
   const name = displayName(file);
 
@@ -73,23 +70,29 @@ async function selectPlayer(file) {
   renderSidebar(players, activeFile);
 
   try {
-    if (!playerCache[file]) {
-      const res = await fetch(`data/players/${file}`);
-      if (!res.ok) throw new Error(`${file}: HTTP ${res.status}`);
-      const buf = await res.arrayBuffer();
-      playerCache[file] = parseWorkbook(buf, name);
-    }
+    // Fetch player file (cached) and master (always fresh) in parallel
+    const [playerData, master] = await Promise.all([
+      (async () => {
+        if (!playerCache[file]) {
+          const res = await fetch(`data/players/${file}?t=${Date.now()}`);
+          if (!res.ok) throw new Error(`${file}: HTTP ${res.status}`);
+          const buf = await res.arrayBuffer();
+          playerCache[file] = parseWorkbook(buf, name);
+        }
+        return playerCache[file];
+      })(),
+      loadMaster(),
+    ]);
 
-    const playerData = playerCache[file];
-    const master = masterData ?? buildEmptyMaster(playerData);
+    const effectiveMaster = master ?? buildEmptyMaster(playerData);
 
-    renderPlayerView(playerData, master, playerData.playerName);
+    renderPlayerView(playerData, effectiveMaster, playerData.playerName);
 
     // Update total pts in sidebar
     const idx = players.findIndex(p => p.file === file);
     if (idx !== -1) {
       players[idx].totalPoints = playerData.groups.reduce((sum, pg, i) => {
-        const { totalPoints } = scoreGroup(pg, master.groups[i]);
+        const { totalPoints } = scoreGroup(pg, effectiveMaster.groups[i]);
         return sum + totalPoints;
       }, 0);
       renderSidebar(players, activeFile);
