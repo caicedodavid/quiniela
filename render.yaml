@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: mundial-2026-quiniela
+    env: static
+    staticPublishPath: .
+    buildCommand: ""   # no build step needed — pure static
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: "public, max-age=60"   # 1 min cache so Excel updates propagate quickly

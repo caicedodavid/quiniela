@@ -1,0 +1,209 @@
+/**
+ * ui.js — Renders the fantasy World Cup dashboard.
+ * All text in Spanish.
+ */
+
+import { scoreGroup, BONUS_PER_POSITION } from './scorer.js';
+
+// ── Point badge styling ───────────────────────────────────────────────────────
+const BADGE = {
+  6:    'bg-yellow-400 text-yellow-900 font-bold',
+  4:    'bg-blue-500   text-white font-bold',
+  3:    'bg-green-500  text-white font-bold',
+  1:    'bg-orange-400 text-white font-semibold',
+  0:    'bg-gray-300   text-gray-600',
+  null: 'bg-gray-100   text-gray-400 italic',
+};
+
+function ptsBadge(points, reason) {
+  const cls = BADGE[points] ?? BADGE[null];
+  const label = points === null ? '—' : `${points}pts`;
+  const tip = reason ? ` title="${reason}"` : '';
+  return `<span class="inline-block px-2 py-0.5 rounded text-sm ${cls} cursor-default"${tip}>${label}</span>`;
+}
+
+function scoreFmt(h, a) {
+  if (h === null || a === null) return '<span class="text-gray-400">–</span>';
+  return `<span class="font-mono font-semibold">${h} – ${a}</span>`;
+}
+
+// ── Group card ────────────────────────────────────────────────────────────────
+function renderGroup(letter, groupResult) {
+  const { matchResults, bonusPoints, groupComplete,
+          playerFinalStandings, masterFinalStandings } = groupResult;
+
+  const matchRows = matchResults.map((m, i) => {
+    const pred   = scoreFmt(m.predH, m.predA);
+    const real   = scoreFmt(m.realH, m.realA);
+    const badge  = ptsBadge(m.points, m.reason);
+    const played = m.realH !== null;
+    const rowCls = !played ? 'bg-white' :
+                   m.points === 6 ? 'bg-yellow-50' :
+                   m.points >= 3  ? 'bg-green-50'  :
+                   m.points === 1 ? 'bg-orange-50'  : 'bg-red-50';
+    return `
+      <tr class="${rowCls} border-b border-gray-100 hover:brightness-95 transition-all">
+        <td class="py-2 px-3 text-gray-500 text-xs w-6">${i+1}</td>
+        <td class="py-2 px-3 text-right font-medium text-sm">${m.home}</td>
+        <td class="py-2 px-3 text-center text-xs text-gray-400">vs</td>
+        <td class="py-2 px-3 font-medium text-sm">${m.away}</td>
+        <td class="py-2 px-3 text-center">${pred}</td>
+        <td class="py-2 px-3 text-center">${real}</td>
+        <td class="py-2 px-3 text-center">${badge}</td>
+      </tr>`;
+  }).join('');
+
+  // Standings comparison (only when group is complete)
+  let standingsHtml = '';
+  if (groupComplete && playerFinalStandings && masterFinalStandings) {
+    const posRows = masterFinalStandings.map((realTeam, pos) => {
+      const predTeam = playerFinalStandings[pos];
+      const correct  = predTeam === realTeam;
+      return `
+        <tr class="${correct ? 'bg-green-50' : 'bg-white'} border-b border-gray-100">
+          <td class="py-1.5 px-3 text-gray-500 text-xs">${pos+1}°</td>
+          <td class="py-1.5 px-3 text-sm">${realTeam}</td>
+          <td class="py-1.5 px-3 text-sm text-gray-500">${predTeam}</td>
+          <td class="py-1.5 px-3 text-center">${correct
+            ? `<span class="text-green-600 font-bold" title="+${BONUS_PER_POSITION} puntos bono">✓ +${BONUS_PER_POSITION}</span>`
+            : '<span class="text-gray-400">—</span>'}</td>
+        </tr>`;
+    }).join('');
+
+    standingsHtml = `
+      <div class="mt-4 border-t border-gray-200 pt-3">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          Posiciones finales — Bono: <span class="text-green-600">${bonusPoints} pts</span>
+        </p>
+        <table class="w-full text-left rounded overflow-hidden">
+          <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+            <tr>
+              <th class="py-1 px-3">Pos</th>
+              <th class="py-1 px-3">Real</th>
+              <th class="py-1 px-3">Predicción</th>
+              <th class="py-1 px-3 text-center">Bono</th>
+            </tr>
+          </thead>
+          <tbody>${posRows}</tbody>
+        </table>
+      </div>`;
+  } else if (!groupComplete) {
+    const played = matchResults.filter(m => m.realH !== null).length;
+    if (played < 6) {
+      standingsHtml = `<p class="text-xs text-gray-400 mt-3 italic">Bono de posiciones disponible cuando termine el grupo (${played}/6 partidos jugados)</p>`;
+    }
+  }
+
+  const groupPts = matchResults.reduce((s, m) => s + (m.points ?? 0), 0) + bonusPoints;
+
+  return `
+    <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+      <header class="bg-gradient-to-r from-green-700 to-green-600 px-4 py-3 flex items-center justify-between">
+        <h2 class="text-white font-bold text-base tracking-wide">Grupo ${letter}</h2>
+        <span class="bg-white/20 text-white text-sm font-semibold px-3 py-0.5 rounded-full">${groupPts} pts</span>
+      </header>
+      <div class="p-4">
+        <table class="w-full">
+          <thead class="text-xs text-gray-500 uppercase bg-gray-50">
+            <tr>
+              <th class="py-2 px-3 text-left w-6">#</th>
+              <th class="py-2 px-3 text-right">Local</th>
+              <th class="py-2 px-3"></th>
+              <th class="py-2 px-3 text-left">Visitante</th>
+              <th class="py-2 px-3 text-center">Predicción</th>
+              <th class="py-2 px-3 text-center">Resultado Real</th>
+              <th class="py-2 px-3 text-center">Puntos</th>
+            </tr>
+          </thead>
+          <tbody>${matchRows}</tbody>
+        </table>
+        ${standingsHtml}
+      </div>
+    </section>`;
+}
+
+// ── Main content area ─────────────────────────────────────────────────────────
+export function renderPlayerView(playerData, masterData, playerName) {
+  const groupResults = playerData.groups.map((pg, i) => {
+    const mg = masterData.groups[i];
+    return { letter: pg.letter, result: scoreGroup(pg, mg) };
+  });
+
+  const totalPoints = groupResults.reduce(
+    (s, { result }) => s + result.totalPoints, 0
+  );
+
+  const groupCards = groupResults
+    .map(({ letter, result }) => renderGroup(letter, result))
+    .join('');
+
+  document.getElementById('main-content').innerHTML = `
+    <!-- Encabezado del jugador -->
+    <div class="mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-6 text-white shadow-lg">
+      <p class="text-green-300 text-sm uppercase tracking-widest font-semibold mb-1">Quiniela de</p>
+      <h1 class="text-3xl font-extrabold mb-4">${playerName}</h1>
+      <div class="flex items-end gap-2">
+        <span class="text-6xl font-black leading-none">${totalPoints}</span>
+        <span class="text-green-300 text-xl mb-1">puntos totales</span>
+      </div>
+      <p class="text-green-400 text-xs mt-2">
+        (incluye bono de posiciones: ${BONUS_PER_POSITION} pts por posición correcta al finalizar cada grupo)
+      </p>
+    </div>
+
+    <!-- Grupos -->
+    ${groupCards}
+  `;
+}
+
+export function renderLoading(name) {
+  document.getElementById('main-content').innerHTML = `
+    <div class="flex flex-col items-center justify-center h-64 text-gray-400">
+      <svg class="animate-spin w-10 h-10 mb-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+      </svg>
+      <p>Cargando predicciones de <strong>${name}</strong>…</p>
+    </div>`;
+}
+
+export function renderError(msg) {
+  document.getElementById('main-content').innerHTML = `
+    <div class="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-6 text-red-700">
+      <span class="text-2xl">⚠️</span>
+      <p>${msg}</p>
+    </div>`;
+}
+
+export function renderWelcome() {
+  document.getElementById('main-content').innerHTML = `
+    <div class="flex flex-col items-center justify-center h-full text-gray-400 gap-4 py-24">
+      <span class="text-7xl">⚽</span>
+      <p class="text-xl font-semibold text-gray-500">Mundial 2026</p>
+      <p class="text-sm">Selecciona un participante del menú para ver sus predicciones</p>
+    </div>`;
+}
+
+// ── Sidebar player list ───────────────────────────────────────────────────────
+export function renderSidebar(players, activeFile) {
+  const items = players.map(p => {
+    const active = p.file === activeFile;
+    return `
+      <li>
+        <button
+          data-file="${p.file}"
+          class="player-btn w-full text-left px-4 py-3 rounded-lg transition-all
+                 ${active
+                   ? 'bg-green-600 text-white font-semibold shadow-md'
+                   : 'text-gray-700 hover:bg-green-50 hover:text-green-800'}"
+        >
+          <span class="block font-medium truncate">${p.displayName}</span>
+          ${p.totalPoints !== null
+            ? `<span class="text-xs ${active ? 'text-green-200' : 'text-gray-400'}">${p.totalPoints} pts</span>`
+            : '<span class="text-xs text-gray-400 italic">pendiente</span>'}
+        </button>
+      </li>`;
+  }).join('');
+
+  document.getElementById('player-list').innerHTML = items;
+}
