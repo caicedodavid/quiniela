@@ -1,0 +1,14 @@
+{
+  "players": [
+    {
+      "file": "david.xlsx",
+      "displayName": "David",
+      "totalPoints": 19
+    },
+    {
+      "file": "la lacra.xlsx",
+      "displayName": "La lacra",
+      "totalPoints": 14
+    }
+  ]
+}

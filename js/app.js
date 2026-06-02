@@ -10,29 +10,30 @@ import { renderPlayerView, renderSidebar, renderLoading, renderError, renderWelc
 // Expose computeStandings for scorer.js (avoids circular import via window bridge)
 window._parserModule = { computeStandings };
 
-const MASTER_PATH = 'data/master.xlsx';
-const MANIFEST_PATH = 'data/manifest.json';
+const MASTER_PATH   = 'data/master.xlsx';
+const SCORES_PATH   = 'data/scores.json';
 
 let players = [];             // [{ file, displayName, totalPoints }]
 let activeFile = null;
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function init() {
-  let manifest;
+  let scores;
   try {
-    const res = await fetch(MANIFEST_PATH);
-    if (!res.ok) throw new Error(`manifest.json: ${res.status}`);
-    manifest = await res.json();
+    const res = await fetch(SCORES_PATH);
+    if (!res.ok) throw new Error(`scores.json: ${res.status}`);
+    scores = await res.json();
   } catch (e) {
     document.getElementById('player-list').innerHTML =
       `<li class="px-4 py-3 text-red-400 text-sm">Error cargando participantes: ${e.message}</li>`;
     return;
   }
 
-  players = manifest.players.map(f => ({
-    file: f,
-    displayName: displayName(f),
-    totalPoints: null,
+  // Players arrive pre-sorted by points from prerender.py
+  players = scores.players.map(p => ({
+    file:        p.file,
+    displayName: p.displayName,
+    totalPoints: p.totalPoints,   // already computed at build time
   }));
 
   renderSidebar(players, null);

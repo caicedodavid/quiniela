@@ -4,8 +4,8 @@
 PORT=7026
 cd "$(dirname "$0")"   # always run from project root
 
-echo "🔄 Actualizando lista de participantes…"
-python3 update_manifest.py
+echo "🔄 Calculando puntos y actualizando scores.json…"
+python3 prerender.py
 
 echo "⚽ Mundial 2026 — http://localhost:$PORT (Ctrl+C para detener)"
 while true; do
