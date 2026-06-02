@@ -7,11 +7,11 @@ import { scoreGroup, BONUS_PER_POSITION } from './scorer.js';
 
 // ── Point badge styling ───────────────────────────────────────────────────────
 const BADGE = {
-  6:    'bg-yellow-400 text-yellow-900 font-bold',
-  4:    'bg-blue-500   text-white font-bold',
-  3:    'bg-green-500  text-white font-bold',
-  1:    'bg-orange-400 text-white font-semibold',
-  0:    'bg-gray-300   text-gray-600',
+  6:    'bg-green-500  text-white font-bold',
+  4:    'bg-yellow-400 text-yellow-900 font-bold',
+  3:    'bg-yellow-400 text-yellow-900 font-bold',
+  1:    'bg-red-400    text-white font-semibold',
+  0:    'bg-red-700    text-white font-semibold',
   null: 'bg-gray-100   text-gray-400 italic',
 };
 
@@ -38,9 +38,9 @@ function renderGroup(letter, groupResult) {
     const badge  = ptsBadge(m.points, m.reason);
     const played = m.realH !== null;
     const rowCls = !played ? 'bg-white' :
-                   m.points === 6 ? 'bg-yellow-50' :
-                   m.points >= 3  ? 'bg-green-50'  :
-                   m.points === 1 ? 'bg-orange-50'  : 'bg-red-50';
+                   m.points === 6 ? 'bg-green-50'  :
+                   m.points >= 3  ? 'bg-yellow-50' :
+                   m.points === 1 ? 'bg-red-50'    : 'bg-red-100';
     return `
       <tr class="${rowCls} border-b border-gray-100 hover:brightness-95 transition-all">
         <td class="py-2 px-3 text-gray-500 text-xs w-6">${i+1}</td>
