@@ -97,26 +97,28 @@ function renderGroup(letter, groupResult) {
   const groupPts = matchResults.reduce((s, m) => s + (m.points ?? 0), 0) + bonusPoints;
 
   return `
-    <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+    <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-4 md:mb-6">
       <header class="bg-gradient-to-r from-green-700 to-green-600 px-4 py-3 flex items-center justify-between">
         <h2 class="text-white font-bold text-base tracking-wide">Grupo ${letter}</h2>
         <span class="bg-white/20 text-white text-sm font-semibold px-3 py-0.5 rounded-full">${groupPts} pts</span>
       </header>
-      <div class="p-4">
-        <table class="w-full">
-          <thead class="text-xs text-gray-500 uppercase bg-gray-50">
-            <tr>
-              <th class="py-2 px-3 text-left w-6">#</th>
-              <th class="py-2 px-3 text-right">Local</th>
-              <th class="py-2 px-3"></th>
-              <th class="py-2 px-3 text-left">Visitante</th>
-              <th class="py-2 px-3 text-center">Predicción</th>
-              <th class="py-2 px-3 text-center">Resultado Real</th>
-              <th class="py-2 px-3 text-center">Puntos</th>
-            </tr>
-          </thead>
-          <tbody>${matchRows}</tbody>
-        </table>
+      <div class="p-2 md:p-4">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[520px]">
+            <thead class="text-xs text-gray-500 uppercase bg-gray-50">
+              <tr>
+                <th class="py-2 px-2 md:px-3 text-left w-6">#</th>
+                <th class="py-2 px-2 md:px-3 text-right">Local</th>
+                <th class="py-2 px-1"></th>
+                <th class="py-2 px-2 md:px-3 text-left">Visitante</th>
+                <th class="py-2 px-2 md:px-3 text-center">Pred.</th>
+                <th class="py-2 px-2 md:px-3 text-center">Real</th>
+                <th class="py-2 px-2 md:px-3 text-center">Pts</th>
+              </tr>
+            </thead>
+            <tbody>${matchRows}</tbody>
+          </table>
+        </div>
         ${standingsHtml}
       </div>
     </section>`;
@@ -139,15 +141,15 @@ export function renderPlayerView(playerData, masterData, playerName) {
 
   document.getElementById('main-content').innerHTML = `
     <!-- Encabezado del jugador -->
-    <div class="mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-6 text-white shadow-lg">
-      <p class="text-green-300 text-sm uppercase tracking-widest font-semibold mb-1">Quiniela de</p>
-      <h1 class="text-3xl font-extrabold mb-4">${playerName}</h1>
+    <div class="mb-4 md:mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-4 md:p-6 text-white shadow-lg">
+      <p class="text-green-300 text-xs uppercase tracking-widest font-semibold mb-1">Quiniela de</p>
+      <h1 class="text-2xl md:text-3xl font-extrabold mb-3">${playerName}</h1>
       <div class="flex items-end gap-2">
-        <span class="text-6xl font-black leading-none">${totalPoints}</span>
-        <span class="text-green-300 text-xl mb-1">puntos totales</span>
+        <span class="text-5xl md:text-6xl font-black leading-none">${totalPoints}</span>
+        <span class="text-green-300 text-lg md:text-xl mb-1">puntos totales</span>
       </div>
       <p class="text-green-400 text-xs mt-2">
-        (incluye bono de posiciones: ${BONUS_PER_POSITION} pts por posición correcta al finalizar cada grupo)
+        (bono posiciones: ${BONUS_PER_POSITION} pts por posición correcta al finalizar cada grupo)
       </p>
     </div>
 
@@ -184,8 +186,9 @@ export function renderWelcome() {
     </div>`;
 }
 
-// ── Sidebar player list ───────────────────────────────────────────────────────
+// ── Sidebar + mobile select ─────────────────────────────────────────────
 export function renderSidebar(players, activeFile) {
+  // Desktop sidebar buttons
   const items = players.map(p => {
     const active = p.file === activeFile;
     return `
@@ -204,6 +207,16 @@ export function renderSidebar(players, activeFile) {
         </button>
       </li>`;
   }).join('');
-
   document.getElementById('player-list').innerHTML = items;
+
+  // Mobile select
+  const sel = document.getElementById('mobile-player-select');
+  if (sel) {
+    sel.innerHTML = `<option value="">Participante…</option>` +
+      players.map(p =>
+        `<option value="${p.file}" ${p.file === activeFile ? 'selected' : ''}>
+          ${p.displayName}${p.totalPoints !== null ? ` — ${p.totalPoints}pts` : ''}
+        </option>`
+      ).join('');
+  }
 }

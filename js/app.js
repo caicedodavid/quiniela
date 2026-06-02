@@ -38,10 +38,15 @@ async function init() {
   renderSidebar(players, null);
   renderWelcome();
 
-  // Wire up player buttons
+  // Wire up desktop sidebar buttons
   document.getElementById('player-list').addEventListener('click', e => {
     const btn = e.target.closest('.player-btn');
     if (btn) selectPlayer(btn.dataset.file);
+  });
+
+  // Wire up mobile player select
+  document.getElementById('mobile-player-select').addEventListener('change', e => {
+    if (e.target.value) selectPlayer(e.target.value);
   });
 }
 
