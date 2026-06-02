@@ -24,7 +24,7 @@ function ptsBadge(points, reason) {
 
 function scoreFmt(h, a) {
   if (h === null || a === null) return '<span class="text-gray-400">–</span>';
-  return `<span class="font-mono font-semibold">${h} – ${a}</span>`;
+  return `<span class="font-mono font-semibold text-xs md:text-sm whitespace-nowrap">${h} – ${a}</span>`;
 }
 
 // ── Group card ────────────────────────────────────────────────────────────────
