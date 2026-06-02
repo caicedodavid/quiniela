@@ -13,7 +13,6 @@ window._parserModule = { computeStandings };
 const MASTER_PATH = 'data/master.xlsx';
 const MANIFEST_PATH = 'data/manifest.json';
 
-let playerCache = {};         // file → parsed data (player files don't change)
 let players = [];             // [{ file, displayName, totalPoints }]
 let activeFile = null;
 
@@ -46,16 +45,29 @@ async function init() {
   });
 }
 
-// ── Master file — always fetched fresh, never cached ────────────────────────
+// ── Resilient fetch — retries up to 3x with 800 ms back-off ─────────────────
+// Excel does an atomic rename on save; the file can vanish for ~500 ms.
+async function fetchWithRetry(url, retries = 3, delayMs = 800) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(`${url}?t=${Date.now()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.arrayBuffer();
+    } catch (e) {
+      if (attempt === retries) throw e;
+      console.warn(`Intento ${attempt} fallido para ${url} — reintentando…`);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+}
+
+// ── Master file — always fresh, never cached ──────────────────────────────────
 async function loadMaster() {
   try {
-    // Cache-bust so the browser never serves a stale Excel mid-edit
-    const res = await fetch(`${MASTER_PATH}?t=${Date.now()}`);
-    if (!res.ok) throw new Error(`master.xlsx: ${res.status}`);
-    const buf = await res.arrayBuffer();
+    const buf = await fetchWithRetry(MASTER_PATH);
     return parseWorkbook(buf, 'master');
   } catch (e) {
-    console.warn('No se pudo cargar el archivo de resultados:', e.message);
+    console.warn('No se pudo cargar resultados reales:', e.message);
     return null;
   }
 }
@@ -70,20 +82,12 @@ async function selectPlayer(file) {
   renderSidebar(players, activeFile);
 
   try {
-    // Fetch player file (cached) and master (always fresh) in parallel
-    const [playerData, master] = await Promise.all([
-      (async () => {
-        if (!playerCache[file]) {
-          const res = await fetch(`data/players/${file}?t=${Date.now()}`);
-          if (!res.ok) throw new Error(`${file}: HTTP ${res.status}`);
-          const buf = await res.arrayBuffer();
-          playerCache[file] = parseWorkbook(buf, name);
-        }
-        return playerCache[file];
-      })(),
+    // Both files fetched fresh every time — Excel edits reflected immediately
+    const [playerBuf, master] = await Promise.all([
+      fetchWithRetry(`data/players/${file}`),
       loadMaster(),
     ]);
-
+    const playerData = parseWorkbook(playerBuf, name);
     const effectiveMaster = master ?? buildEmptyMaster(playerData);
 
     renderPlayerView(playerData, effectiveMaster, playerData.playerName);
