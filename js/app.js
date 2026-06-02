@@ -84,7 +84,7 @@ async function selectPlayer(file) {
   try {
     // Both files fetched fresh every time — Excel edits reflected immediately
     const [playerBuf, master] = await Promise.all([
-      fetchWithRetry(`data/players/${file}`),
+      fetchWithRetry(`data/players/${encodeURIComponent(file)}`),
       loadMaster(),
     ]);
     const playerData = parseWorkbook(playerBuf, name);
@@ -108,7 +108,7 @@ async function selectPlayer(file) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/** "david.xlsx" → "David" */
+/** "la lacra.xlsx" → "La lacra",  "david.xlsx" → "David" */
 function displayName(filename) {
   const base = filename.replace(/\.xlsx$/i, '');
   return base.charAt(0).toUpperCase() + base.slice(1);
