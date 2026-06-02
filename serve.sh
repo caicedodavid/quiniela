@@ -1,7 +1,12 @@
 #!/bin/bash
-# serve.sh — Keeps the local dev server alive.
-# Auto-restarts if it crashes (e.g. Excel locking a file mid-save).
+# serve.sh — Auto-updates manifest then keeps the local dev server alive.
+# Just drop Excel files in data/players/ and restart this script.
 PORT=7026
+cd "$(dirname "$0")"   # always run from project root
+
+echo "🔄 Actualizando lista de participantes…"
+python3 update_manifest.py
+
 echo "⚽ Mundial 2026 — http://localhost:$PORT (Ctrl+C para detener)"
 while true; do
   python3 -m http.server $PORT
