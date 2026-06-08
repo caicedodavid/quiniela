@@ -29,14 +29,25 @@ COL_AF = 32   # away team name
 COL_BD = 56   # standings team name
 
 
+PLACEHOLDER_NAMES = {"nombre", "name", "player", "jugador"}
+
 # ── Excel parsing ─────────────────────────────────────────────────────────────
 
 def _cell(ws, row, col):
     v = ws.cell(row, col).value
     return None if v == "" or v is None else v
 
+def parse_player_name(wb, fallback):
+    """Read Home!C10 for the player's real name; fall back to filename-derived name."""
+    home = wb["Home"] if "Home" in wb.sheetnames else None
+    if home:
+        v = home.cell(10, 3).value  # C10
+        if v and str(v).strip() and str(v).strip().lower() not in PLACEHOLDER_NAMES:
+            return str(v).strip()
+    return fallback
+
 def parse_groups(path):
-    """Return list of 12 group dicts from a WORLDCUP sheet."""
+    """Return (player_name, groups) from a player Excel file."""
     wb = openpyxl.load_workbook(path, data_only=True)
     if "WORLDCUP" not in wb.sheetnames:
         raise ValueError(f"No WORLDCUP sheet in {path.name}")
@@ -67,7 +78,8 @@ def parse_groups(path):
 
         groups.append({"letter": letter, "teams": teams, "matches": matches})
 
-    return groups
+    player_name = parse_player_name(wb, display_name(path.name))
+    return player_name, groups
 
 
 # ── Scoring (mirrors js/scorer.js) ───────────────────────────────────────────
@@ -135,8 +147,8 @@ def main():
     master_groups = None
     if MASTER.exists():
         try:
-            master_groups = parse_groups(MASTER)
-            print(f"✅ master.xlsx cargado")
+            _, master_groups = parse_groups(MASTER)
+            print(f"master.xlsx cargado")
         except Exception as e:
             print(f"⚠️  master.xlsx no se pudo leer: {e}")
     else:
@@ -150,9 +162,9 @@ def main():
 
     players = []
     for path in xlsx_files:
-        name = display_name(path.name)
+        fallback = display_name(path.name)
         try:
-            pg = parse_groups(path)
+            name, pg = parse_groups(path)
             if master_groups:
                 pts = score_player(pg, master_groups)
                 print(f"  {name}: {pts} pts")
@@ -160,7 +172,8 @@ def main():
                 pts = None
                 print(f"  {name}: pendiente")
         except Exception as e:
-            print(f"  ⚠️  {name}: error — {e}")
+            name = fallback
+            print(f"    {name}: error — {e}")
             pts = None
         players.append({"file": path.name, "displayName": name, "totalPoints": pts})
 
