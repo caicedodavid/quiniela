@@ -5,6 +5,32 @@
 
 import { scoreGroup, BONUS_PER_POSITION } from './scorer.js';
 
+// ── Country code map (FIFA 3-letter codes) ────────────────────────────────────
+const TEAM_CODE = {
+  'Alemania': 'GER', 'Arabia Saudita': 'KSA', 'Argelia': 'ALG',
+  'Argentina': 'ARG', 'Australia': 'AUS', 'Austria': 'AUT',
+  'Bosnia y Herzegovina': 'BIH', 'Brasil': 'BRA', 'B\u00e9lgica': 'BEL',
+  'Cabo Verde': 'CPV', 'Canad\u00e1': 'CAN', 'Catar': 'QAT',
+  'Colombia': 'COL', 'Corea del Sur': 'KOR', 'Costa de Marfil': 'CIV',
+  'Croacia': 'CRO', 'Curazao': 'CUW', 'Ecuador': 'ECU',
+  'Egipto': 'EGY', 'Escocia': 'SCO', 'Espa\u00f1a': 'ESP',
+  'Estados Unidos': 'USA', 'Francia': 'FRA', 'Ghana': 'GHA',
+  'Hait\u00ed': 'HAI', 'Inglaterra': 'ENG', 'Irak': 'IRQ',
+  'Ir\u00e1n': 'IRN', 'Jap\u00f3n': 'JPN', 'Jordania': 'JOR',
+  'Marruecos': 'MAR', 'M\u00e9xico': 'MEX', 'Noruega': 'NOR',
+  'Nueva Zelanda': 'NZL', 'Panam\u00e1': 'PAN', 'Paraguay': 'PAR',
+  'Pa\u00edses Bajos': 'NED', 'Portugal': 'POR', 'RD Congo': 'COD',
+  'Rep\u00fablica Checa': 'CZE', 'Senegal': 'SEN', 'Sud\u00e1frica': 'RSA',
+  'Suecia': 'SWE', 'Suiza': 'SUI', 'Turqu\u00eda': 'TUR',
+  'T\u00fanez': 'TUN', 'Uruguay': 'URU', 'Uzbekist\u00e1n': 'UZB',
+};
+
+/** Full name on desktop, FIFA code on mobile */
+function teamName(name) {
+  const code = TEAM_CODE[name] ?? name;
+  return `<span class="hidden md:inline">${name}</span><span class="md:hidden font-mono">${code}</span>`;
+}
+
 // ── Point badge styling ───────────────────────────────────────────────────────
 const BADGE = {
   6:    'bg-green-500  text-white font-bold',
@@ -44,9 +70,9 @@ function renderGroup(letter, groupResult) {
     return `
       <tr class="${rowCls} border-b border-gray-100 hover:brightness-95 transition-all">
         <td class="py-2 px-3 text-gray-500 text-xs w-6">${i+1}</td>
-        <td class="py-2 px-3 text-right font-medium text-sm">${m.home}</td>
+        <td class="py-2 px-3 text-right font-medium text-sm">${teamName(m.home)}</td>
         <td class="py-2 px-3 text-center text-xs text-gray-400">vs</td>
-        <td class="py-2 px-3 font-medium text-sm">${m.away}</td>
+        <td class="py-2 px-3 font-medium text-sm">${teamName(m.away)}</td>
         <td class="py-2 px-3 text-center">${pred}</td>
         <td class="py-2 px-3 text-center">${real}</td>
         <td class="py-2 px-3 text-center">${badge}</td>
@@ -104,7 +130,7 @@ function renderGroup(letter, groupResult) {
       </header>
       <div class="p-2 md:p-4">
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[520px]">
+          <table class="w-full min-w-0">
             <thead class="text-xs text-gray-500 uppercase bg-gray-50">
               <tr>
                 <th class="py-2 px-2 md:px-3 text-left w-6">#</th>
