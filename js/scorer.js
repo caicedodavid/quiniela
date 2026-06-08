@@ -14,7 +14,7 @@
  *   BONUS_PER_POSITION pts per correctly predicted final position.
  */
 
-export const BONUS_PER_POSITION = 2; // configurable
+export const BONUS_PER_POSITION = 1; // configurable
 
 /**
  * Score one match.

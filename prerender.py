@@ -19,7 +19,7 @@ OUT       = ROOT / "data" / "scores.json"
 NICKNAMES = ROOT / "data" / "nicknames.json"
 
 GROUPS           = list("ABCDEFGHIJKL")
-BONUS_PER_POS    = 2   # must match js/scorer.js
+BONUS_PER_POS    = 1   # must match js/scorer.js
 
 # openpyxl uses 1-based column numbers
 COL_A  = 1
