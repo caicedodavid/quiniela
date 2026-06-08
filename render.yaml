@@ -3,7 +3,7 @@ services:
     name: mundial-2026-quiniela
     env: static
     staticPublishPath: .
-    buildCommand: "pip install openpyxl && python3 prerender.py"
+    buildCommand: "pip install -r requirements.txt && python3 prerender.py"
     pullRequestPreviewsEnabled: true
     headers:
       - path: /*

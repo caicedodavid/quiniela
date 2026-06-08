@@ -196,7 +196,12 @@ def main():
     ))
 
     OUT.write_text(json.dumps({"players": players}, ensure_ascii=False, indent=2))
-    print(f"\n🏆 scores.json escrito — {len(players)} participante(s)")
+    print(f"scores.json written -- {len(players)} participant(s)")
+    if not players:
+        sys.exit("ERROR: no player files found -- aborting build")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        sys.exit(f"ERROR: prerender.py crashed: {e}")
