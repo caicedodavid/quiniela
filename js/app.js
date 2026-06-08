@@ -4,11 +4,15 @@
  */
 
 import { parseWorkbook, computeStandings } from './parser.js';
-import { scoreGroup } from './scorer.js';
+import { scoreGroup, BONUS_PER_POSITION } from './scorer.js';
 import { renderPlayerView, renderSidebar, renderLoading, renderError, renderWelcome } from './ui.js';
 
 // Expose computeStandings for scorer.js (avoids circular import via window bridge)
 window._parserModule = { computeStandings };
+
+// Keep sidebar footer in sync with the actual constant
+const bonusLabel = document.getElementById('bonus-label');
+if (bonusLabel) bonusLabel.textContent = `${BONUS_PER_POSITION} pt${BONUS_PER_POSITION === 1 ? '' : 's'}`;
 
 const MASTER_PATH   = 'data/master.xlsx';
 const SCORES_PATH   = 'data/scores.json';
