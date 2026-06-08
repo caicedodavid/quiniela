@@ -134,9 +134,9 @@ function renderGroup(letter, groupResult) {
             <thead class="text-xs text-gray-500 uppercase bg-gray-50">
               <tr>
                 <th class="py-2 px-2 md:px-3 text-left w-6">#</th>
-                <th class="py-2 px-2 md:px-3 text-right">Local</th>
+                <th class="py-2 px-2 md:px-3 text-right">LOC</th>
                 <th class="py-2 px-1"></th>
-                <th class="py-2 px-2 md:px-3 text-left">Visitante</th>
+                <th class="py-2 px-2 md:px-3 text-left">VIS</th>
                 <th class="py-2 px-2 md:px-3 text-center">Pred.</th>
                 <th class="py-2 px-2 md:px-3 text-center">Real</th>
                 <th class="py-2 px-2 md:px-3 text-center">Pts</th>
