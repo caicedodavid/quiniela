@@ -191,19 +191,21 @@ export function renderSidebar(players, activeFile) {
   // Desktop sidebar buttons
   const items = players.map(p => {
     const active = p.file === activeFile;
+    const ptsLabel = p.totalPoints !== null
+      ? `<span class="text-xs font-mono shrink-0 ${active ? 'text-green-200' : 'text-gray-400'}">${p.totalPoints}pts</span>`
+      : `<span class="text-xs shrink-0 ${active ? 'text-green-300' : 'text-gray-300'} italic">--</span>`;
     return `
       <li>
         <button
           data-file="${p.file}"
-          class="player-btn w-full text-left px-4 py-3 rounded-lg transition-all
+          class="player-btn w-full text-left px-3 py-1.5 rounded-md transition-all
+                 flex items-center justify-between gap-2
                  ${active
-                   ? 'bg-green-600 text-white font-semibold shadow-md'
+                   ? 'bg-green-600 text-white font-semibold shadow-sm'
                    : 'text-gray-700 hover:bg-green-50 hover:text-green-800'}"
         >
-          <span class="block font-medium truncate">${p.displayName}</span>
-          ${p.totalPoints !== null
-            ? `<span class="text-xs ${active ? 'text-green-200' : 'text-gray-400'}">${p.totalPoints} pts</span>`
-            : '<span class="text-xs text-gray-400 italic">pendiente</span>'}
+          <span class="text-xs font-medium truncate">${p.displayName}</span>
+          ${ptsLabel}
         </button>
       </li>`;
   }).join('');
