@@ -80,23 +80,22 @@ async function loadMaster() {
 
 // ── Player selection ──────────────────────────────────────────────────────────
 async function selectPlayer(file) {
-  // Allow re-clicking the same player to force a refresh
   activeFile = file;
-  const name = displayName(file);
+  const player = players.find(p => p.file === file);
+  const nickname = player?.displayName ?? displayName(file);
 
-  renderLoading(name);
+  renderLoading(nickname);
   renderSidebar(players, activeFile);
 
   try {
-    // Both files fetched fresh every time — Excel edits reflected immediately
     const [playerBuf, master] = await Promise.all([
       fetchWithRetry(`data/players/${encodeURIComponent(file)}`),
       loadMaster(),
     ]);
-    const playerData = parseWorkbook(playerBuf, name);
+    const playerData = parseWorkbook(playerBuf, nickname);
     const effectiveMaster = master ?? buildEmptyMaster(playerData);
 
-    renderPlayerView(playerData, effectiveMaster, playerData.playerName);
+    renderPlayerView(playerData, effectiveMaster, nickname);
 
     // Update total pts in sidebar
     const idx = players.findIndex(p => p.file === file);
@@ -108,7 +107,7 @@ async function selectPlayer(file) {
       renderSidebar(players, activeFile);
     }
   } catch (e) {
-    renderError(`Error cargando el archivo de ${name}: ${e.message}`);
+    renderError(`Error cargando el archivo de ${nickname}: ${e.message}`);
   }
 }
 
