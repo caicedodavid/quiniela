@@ -12,10 +12,11 @@ try:
 except ImportError:
     sys.exit("Missing dependency: pip install openpyxl")
 
-ROOT    = pathlib.Path(__file__).parent
-PLAYERS = ROOT / "data" / "players"
-MASTER  = ROOT / "data" / "master.xlsx"
-OUT     = ROOT / "data" / "scores.json"
+ROOT      = pathlib.Path(__file__).parent
+PLAYERS   = ROOT / "data" / "players"
+MASTER    = ROOT / "data" / "master.xlsx"
+OUT       = ROOT / "data" / "scores.json"
+NICKNAMES = ROOT / "data" / "nicknames.json"
 
 GROUPS           = list("ABCDEFGHIJKL")
 BONUS_PER_POS    = 2   # must match js/scorer.js
@@ -142,7 +143,15 @@ def display_name(filename):
     base = filename.replace(".xlsx", "").replace(".XLSX", "")
     return base[0].upper() + base[1:] if base else filename
 
+def load_nicknames():
+    """Return filename->nickname dict, or empty dict if file missing."""
+    if not NICKNAMES.exists():
+        return {}
+    return json.loads(NICKNAMES.read_text(encoding="utf-8"))
+
+
 def main():
+    nicknames = load_nicknames()
     # Load master results (optional — no master = all pending)
     master_groups = None
     if MASTER.exists():
@@ -164,7 +173,9 @@ def main():
     for path in xlsx_files:
         fallback = display_name(path.name)
         try:
-            name, pg = parse_groups(path)
+            excel_name, pg = parse_groups(path)
+            # Priority: nicknames.json > Home!C10 > filename
+            name = nicknames.get(path.name, excel_name)
             if master_groups:
                 pts = score_player(pg, master_groups)
                 print(f"  {name}: {pts} pts")
@@ -172,7 +183,7 @@ def main():
                 pts = None
                 print(f"  {name}: pendiente")
         except Exception as e:
-            name = fallback
+            name = nicknames.get(path.name, fallback)
             print(f"    {name}: error — {e}")
             pts = None
         players.append({"file": path.name, "displayName": name, "totalPoints": pts})
