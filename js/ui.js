@@ -82,42 +82,65 @@ function renderGroup(letter, groupResult) {
   // Standings comparison (only when group is complete)
   let standingsHtml = '';
   if (groupComplete && playerFinalStandings && masterFinalStandings) {
+    // Group done: show real vs predicted with bonus
     const posRows = masterFinalStandings.map((realTeam, pos) => {
       const predTeam = playerFinalStandings[pos];
       const correct  = predTeam === realTeam;
       return `
         <tr class="${correct ? 'bg-green-50' : 'bg-white'} border-b border-gray-100">
           <td class="py-1.5 px-3 text-gray-500 text-xs">${pos+1}°</td>
-          <td class="py-1.5 px-3 text-sm">${realTeam}</td>
-          <td class="py-1.5 px-3 text-sm text-gray-500">${predTeam}</td>
+          <td class="py-1.5 px-3 text-sm font-medium">${teamName(realTeam)}</td>
+          <td class="py-1.5 px-3 text-sm text-gray-500">${teamName(predTeam)}</td>
           <td class="py-1.5 px-3 text-center">${correct
-            ? `<span class="text-green-600 font-bold" title="+${BONUS_PER_POSITION} puntos bono">✓ +${BONUS_PER_POSITION}</span>`
-            : '<span class="text-gray-400">—</span>'}</td>
+            ? `<span class="text-green-600 font-bold" title="+${BONUS_PER_POSITION} pt bono">+${BONUS_PER_POSITION}</span>`
+            : '<span class="text-gray-300">—</span>'}</td>
         </tr>`;
     }).join('');
 
     standingsHtml = `
       <div class="mt-4 border-t border-gray-200 pt-3">
         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-          Posiciones finales — Bono: <span class="text-green-600">${bonusPoints} pts</span>
+          Posiciones finales
+          <span class="ml-2 text-green-600 normal-case font-bold">+${bonusPoints} pts bono</span>
         </p>
         <table class="w-full text-left rounded overflow-hidden">
           <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
             <tr>
               <th class="py-1 px-3">Pos</th>
               <th class="py-1 px-3">Real</th>
-              <th class="py-1 px-3">Predicción</th>
+              <th class="py-1 px-3">Pred.</th>
               <th class="py-1 px-3 text-center">Bono</th>
             </tr>
           </thead>
           <tbody>${posRows}</tbody>
         </table>
       </div>`;
-  } else if (!groupComplete) {
+
+  } else if (playerFinalStandings) {
+    // Group not done yet: show predicted positions only
     const played = matchResults.filter(m => m.realH !== null).length;
-    if (played < 6) {
-      standingsHtml = `<p class="text-xs text-gray-400 mt-3 italic">Bono de posiciones disponible cuando termine el grupo (${played}/6 partidos jugados)</p>`;
-    }
+    const predRows = playerFinalStandings.map((team, pos) => `
+      <tr class="border-b border-gray-100">
+        <td class="py-1.5 px-3 text-gray-400 text-xs">${pos+1}°</td>
+        <td class="py-1.5 px-3 text-sm text-gray-700">${teamName(team)}</td>
+      </tr>`).join('');
+
+    standingsHtml = `
+      <div class="mt-4 border-t border-gray-200 pt-3">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          Posiciones predichas
+          <span class="ml-2 text-gray-400 normal-case font-normal italic">(bono al terminar grupo — ${played}/6)</span>
+        </p>
+        <table class="w-full text-left rounded overflow-hidden">
+          <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+            <tr>
+              <th class="py-1 px-3">Pos</th>
+              <th class="py-1 px-3">Equipo</th>
+            </tr>
+          </thead>
+          <tbody>${predRows}</tbody>
+        </table>
+      </div>`;
   }
 
   const groupPts = matchResults.reduce((s, m) => s + (m.points ?? 0), 0) + bonusPoints;

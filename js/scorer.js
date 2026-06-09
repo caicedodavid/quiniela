@@ -86,13 +86,11 @@ export function scoreGroup(playerGroup, masterGroup) {
   let playerFinalStandings = null;
   let masterFinalStandings = null;
 
-  if (groupComplete) {
-    // Compute actual standings from master results
-    masterFinalStandings = computeStandings(masterGroup.teams, masterGroup.matches);
-    // Compute player's predicted standings from their predicted scores
-    playerFinalStandings = computeStandings(playerGroup.teams, playerGroup.matches);
+  // Always compute player's predicted standings so UI can show them
+  playerFinalStandings = computeStandings(playerGroup.teams, playerGroup.matches);
 
-    // Award bonus for each position that matches
+  if (groupComplete) {
+    masterFinalStandings = computeStandings(masterGroup.teams, masterGroup.matches);
     for (let pos = 0; pos < 4; pos++) {
       if (playerFinalStandings[pos] === masterFinalStandings[pos]) {
         bonusPoints += BONUS_PER_POSITION;
