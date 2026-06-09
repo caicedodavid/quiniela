@@ -177,7 +177,7 @@ function renderGroup(letter, groupResult, playerGroup) {
               <th class="py-1 px-1 text-center">DG</th>
             </tr>
           </thead>
-          </thead>
+          <tbody>${predRows}</tbody>
         </table>
       </div>`;
   }
