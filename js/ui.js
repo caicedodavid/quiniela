@@ -95,7 +95,6 @@ function renderGroup(letter, groupResult, playerGroup) {
           <td class="py-1.5 px-2 font-medium">${teamName(realTeam)}</td>
           <td class="py-1.5 px-2 text-gray-500">${teamName(predTeam)}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.pts}</td>
-          <td class="py-1.5 px-1 text-center text-gray-500">${st.j}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.g}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.e}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.p}</td>
@@ -121,7 +120,6 @@ function renderGroup(letter, groupResult, playerGroup) {
               <th class="py-1 px-2">Real</th>
               <th class="py-1 px-2">Pred.</th>
               <th class="py-1 px-1 text-center">Pts</th>
-              <th class="py-1 px-1 text-center">J</th>
               <th class="py-1 px-1 text-center">G</th>
               <th class="py-1 px-1 text-center">E</th>
               <th class="py-1 px-1 text-center">P</th>
@@ -146,7 +144,6 @@ function renderGroup(letter, groupResult, playerGroup) {
           <td class="py-1.5 px-2 text-gray-400">${pos+1}°</td>
           <td class="py-1.5 px-2 font-medium text-gray-700">${teamName(team)}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.pts}</td>
-          <td class="py-1.5 px-1 text-center text-gray-500">${st.j}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.g}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.e}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.p}</td>
@@ -168,7 +165,6 @@ function renderGroup(letter, groupResult, playerGroup) {
               <th class="py-1 px-2">#</th>
               <th class="py-1 px-2">Equipo</th>
               <th class="py-1 px-1 text-center">Pts</th>
-              <th class="py-1 px-1 text-center">J</th>
               <th class="py-1 px-1 text-center">G</th>
               <th class="py-1 px-1 text-center">E</th>
               <th class="py-1 px-1 text-center">P</th>
