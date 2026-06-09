@@ -1,3 +1,4 @@
+
 /**
  * ui.js — Renders the fantasy World Cup dashboard.
  * All text in Spanish.
@@ -93,7 +94,7 @@ function renderGroup(letter, groupResult, playerGroup) {
           <td class="py-1.5 px-2 text-gray-400">${pos+1}°</td>
           <td class="py-1.5 px-2 font-medium">${teamName(realTeam)}</td>
           <td class="py-1.5 px-2 text-gray-500">${teamName(predTeam)}</td>
-          <td class="py-1.5 px-1 text-center font-bold text-gray-700">${st.pts}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.pts}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.j}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.g}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.e}</td>
@@ -119,7 +120,7 @@ function renderGroup(letter, groupResult, playerGroup) {
               <th class="py-1 px-2">#</th>
               <th class="py-1 px-2">Real</th>
               <th class="py-1 px-2">Pred.</th>
-              <th class="py-1 px-1 text-center font-bold text-gray-600">Pts</th>
+              <th class="py-1 px-1 text-center">Pts</th>
               <th class="py-1 px-1 text-center">J</th>
               <th class="py-1 px-1 text-center">G</th>
               <th class="py-1 px-1 text-center">E</th>
@@ -144,7 +145,7 @@ function renderGroup(letter, groupResult, playerGroup) {
         <tr class="border-b border-gray-100 text-xs">
           <td class="py-1.5 px-2 text-gray-400">${pos+1}°</td>
           <td class="py-1.5 px-2 font-medium text-gray-700">${teamName(team)}</td>
-          <td class="py-1.5 px-1 text-center font-bold text-gray-700">${st.pts}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.pts}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.j}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.g}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.e}</td>
@@ -166,7 +167,7 @@ function renderGroup(letter, groupResult, playerGroup) {
             <tr>
               <th class="py-1 px-2">#</th>
               <th class="py-1 px-2">Equipo</th>
-              <th class="py-1 px-1 text-center font-bold text-gray-600">Pts</th>
+              <th class="py-1 px-1 text-center">Pts</th>
               <th class="py-1 px-1 text-center">J</th>
               <th class="py-1 px-1 text-center">G</th>
               <th class="py-1 px-1 text-center">E</th>
@@ -176,7 +177,7 @@ function renderGroup(letter, groupResult, playerGroup) {
               <th class="py-1 px-1 text-center">DG</th>
             </tr>
           </thead>
-          <tbody>${predRows}</tbody>
+          </thead>
         </table>
       </div>`;
   }
