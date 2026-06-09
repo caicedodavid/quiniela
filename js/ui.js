@@ -54,7 +54,7 @@ function scoreFmt(h, a) {
 }
 
 // ── Group card ────────────────────────────────────────────────────────────────
-function renderGroup(letter, groupResult) {
+function renderGroup(letter, groupResult, playerGroup) {
   const { matchResults, bonusPoints, groupComplete,
           playerFinalStandings, masterFinalStandings } = groupResult;
 
@@ -82,34 +82,50 @@ function renderGroup(letter, groupResult) {
   // Standings comparison (only when group is complete)
   let standingsHtml = '';
   if (groupComplete && playerFinalStandings && masterFinalStandings) {
-    // Group done: show real vs predicted with bonus
+    // Group done: show real vs predicted with bonus + stats
+    const stats = computeTableStats(playerGroup.teams, playerGroup.matches);
     const posRows = masterFinalStandings.map((realTeam, pos) => {
       const predTeam = playerFinalStandings[pos];
       const correct  = predTeam === realTeam;
+      const st = stats[predTeam] ?? { j:0, g:0, e:0, p:0, gf:0, gc:0 };
       return `
-        <tr class="${correct ? 'bg-green-50' : 'bg-white'} border-b border-gray-100">
-          <td class="py-1.5 px-3 text-gray-500 text-xs">${pos+1}°</td>
-          <td class="py-1.5 px-3 text-sm font-medium">${teamName(realTeam)}</td>
-          <td class="py-1.5 px-3 text-sm text-gray-500">${teamName(predTeam)}</td>
-          <td class="py-1.5 px-3 text-center">${correct
-            ? `<span class="text-green-600 font-bold" title="+${BONUS_PER_POSITION} pt bono">+${BONUS_PER_POSITION}</span>`
+        <tr class="${correct ? 'bg-green-50' : 'bg-white'} border-b border-gray-100 text-xs">
+          <td class="py-1.5 px-2 text-gray-400">${pos+1}°</td>
+          <td class="py-1.5 px-2 font-medium">${teamName(realTeam)}</td>
+          <td class="py-1.5 px-2 text-gray-500">${teamName(predTeam)}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.j}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.g}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.e}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.p}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.gf}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.gc}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.gf - st.gc}</td>
+          <td class="py-1.5 px-2 text-center font-bold">${correct
+            ? `<span class="text-green-600">+${BONUS_PER_POSITION}</span>`
             : '<span class="text-gray-300">—</span>'}</td>
         </tr>`;
     }).join('');
 
     standingsHtml = `
-      <div class="mt-4 border-t border-gray-200 pt-3">
+      <div class="mt-4 border-t border-gray-200 pt-3 overflow-x-auto">
         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
           Posiciones finales
           <span class="ml-2 text-green-600 normal-case font-bold">+${bonusPoints} pts bono</span>
         </p>
         <table class="w-full text-left rounded overflow-hidden">
-          <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+          <thead class="bg-gray-50 text-xs text-gray-400 uppercase">
             <tr>
-              <th class="py-1 px-3">Pos</th>
-              <th class="py-1 px-3">Real</th>
-              <th class="py-1 px-3">Pred.</th>
-              <th class="py-1 px-3 text-center">Bono</th>
+              <th class="py-1 px-2">#</th>
+              <th class="py-1 px-2">Real</th>
+              <th class="py-1 px-2">Pred.</th>
+              <th class="py-1 px-1 text-center">J</th>
+              <th class="py-1 px-1 text-center">G</th>
+              <th class="py-1 px-1 text-center">E</th>
+              <th class="py-1 px-1 text-center">P</th>
+              <th class="py-1 px-1 text-center">GF</th>
+              <th class="py-1 px-1 text-center">GC</th>
+              <th class="py-1 px-1 text-center">DG</th>
+              <th class="py-1 px-2 text-center">Bono</th>
             </tr>
           </thead>
           <tbody>${posRows}</tbody>
@@ -117,25 +133,43 @@ function renderGroup(letter, groupResult) {
       </div>`;
 
   } else if (playerFinalStandings) {
-    // Group not done yet: show predicted positions only
+    // Group not done yet: show predicted positions + stats
     const played = matchResults.filter(m => m.realH !== null).length;
-    const predRows = playerFinalStandings.map((team, pos) => `
-      <tr class="border-b border-gray-100">
-        <td class="py-1.5 px-3 text-gray-400 text-xs">${pos+1}°</td>
-        <td class="py-1.5 px-3 text-sm text-gray-700">${teamName(team)}</td>
-      </tr>`).join('');
+    const stats = computeTableStats(playerGroup.teams, playerGroup.matches);
+    const predRows = playerFinalStandings.map((team, pos) => {
+      const st = stats[team] ?? { j:0, g:0, e:0, p:0, gf:0, gc:0 };
+      return `
+        <tr class="border-b border-gray-100 text-xs">
+          <td class="py-1.5 px-2 text-gray-400">${pos+1}°</td>
+          <td class="py-1.5 px-2 font-medium text-gray-700">${teamName(team)}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.j}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.g}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.e}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.p}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.gf}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.gc}</td>
+          <td class="py-1.5 px-1 text-center text-gray-500">${st.gf - st.gc}</td>
+        </tr>`;
+    }).join('');
 
     standingsHtml = `
-      <div class="mt-4 border-t border-gray-200 pt-3">
+      <div class="mt-4 border-t border-gray-200 pt-3 overflow-x-auto">
         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
           Posiciones predichas
           <span class="ml-2 text-gray-400 normal-case font-normal italic">(bono al terminar grupo — ${played}/6)</span>
         </p>
         <table class="w-full text-left rounded overflow-hidden">
-          <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+          <thead class="bg-gray-50 text-xs text-gray-400 uppercase">
             <tr>
-              <th class="py-1 px-3">Pos</th>
-              <th class="py-1 px-3">Equipo</th>
+              <th class="py-1 px-2">#</th>
+              <th class="py-1 px-2">Equipo</th>
+              <th class="py-1 px-1 text-center">J</th>
+              <th class="py-1 px-1 text-center">G</th>
+              <th class="py-1 px-1 text-center">E</th>
+              <th class="py-1 px-1 text-center">P</th>
+              <th class="py-1 px-1 text-center">GF</th>
+              <th class="py-1 px-1 text-center">GC</th>
+              <th class="py-1 px-1 text-center">DG</th>
             </tr>
           </thead>
           <tbody>${predRows}</tbody>
@@ -173,11 +207,27 @@ function renderGroup(letter, groupResult) {
     </section>`;
 }
 
+// ── Standings stats (J G E P GF GC DG) from predicted matches ────────────────
+function computeTableStats(teams, matches) {
+  const s = Object.fromEntries(teams.map(t => [t, { j:0, g:0, e:0, p:0, gf:0, gc:0 }]));
+  for (const { home, away, homeGoals, awayGoals } of matches) {
+    if (homeGoals === null || awayGoals === null) continue;
+    const hg = Number(homeGoals), ag = Number(awayGoals);
+    s[home].j++; s[away].j++;
+    s[home].gf += hg; s[home].gc += ag;
+    s[away].gf += ag; s[away].gc += hg;
+    if      (hg > ag) { s[home].g++; s[away].p++; }
+    else if (hg < ag) { s[away].g++; s[home].p++; }
+    else              { s[home].e++; s[away].e++; }
+  }
+  return s;
+}
+
 // ── Main content area ─────────────────────────────────────────────────────────
 export function renderPlayerView(playerData, masterData, playerName) {
   const groupResults = playerData.groups.map((pg, i) => {
     const mg = masterData.groups[i];
-    return { letter: pg.letter, result: scoreGroup(pg, mg) };
+    return { letter: pg.letter, result: scoreGroup(pg, mg), playerGroup: pg };
   });
 
   const totalPoints = groupResults.reduce(
@@ -185,7 +235,7 @@ export function renderPlayerView(playerData, masterData, playerName) {
   );
 
   const groupCards = groupResults
-    .map(({ letter, result }) => renderGroup(letter, result))
+    .map(({ letter, result, playerGroup }) => renderGroup(letter, result, playerGroup))
     .join('');
 
   document.getElementById('main-content').innerHTML = `
