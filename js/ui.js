@@ -87,12 +87,13 @@ function renderGroup(letter, groupResult, playerGroup) {
     const posRows = masterFinalStandings.map((realTeam, pos) => {
       const predTeam = playerFinalStandings[pos];
       const correct  = predTeam === realTeam;
-      const st = stats[predTeam] ?? { j:0, g:0, e:0, p:0, gf:0, gc:0 };
+      const st = stats[predTeam] ?? { pts:0, j:0, g:0, e:0, p:0, gf:0, gc:0 };
       return `
         <tr class="${correct ? 'bg-green-50' : 'bg-white'} border-b border-gray-100 text-xs">
           <td class="py-1.5 px-2 text-gray-400">${pos+1}°</td>
           <td class="py-1.5 px-2 font-medium">${teamName(realTeam)}</td>
           <td class="py-1.5 px-2 text-gray-500">${teamName(predTeam)}</td>
+          <td class="py-1.5 px-1 text-center font-bold text-gray-700">${st.pts}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.j}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.g}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.e}</td>
@@ -118,6 +119,7 @@ function renderGroup(letter, groupResult, playerGroup) {
               <th class="py-1 px-2">#</th>
               <th class="py-1 px-2">Real</th>
               <th class="py-1 px-2">Pred.</th>
+              <th class="py-1 px-1 text-center font-bold text-gray-600">Pts</th>
               <th class="py-1 px-1 text-center">J</th>
               <th class="py-1 px-1 text-center">G</th>
               <th class="py-1 px-1 text-center">E</th>
@@ -137,11 +139,12 @@ function renderGroup(letter, groupResult, playerGroup) {
     const played = matchResults.filter(m => m.realH !== null).length;
     const stats = computeTableStats(playerGroup.teams, playerGroup.matches);
     const predRows = playerFinalStandings.map((team, pos) => {
-      const st = stats[team] ?? { j:0, g:0, e:0, p:0, gf:0, gc:0 };
+      const st = stats[team] ?? { pts:0, j:0, g:0, e:0, p:0, gf:0, gc:0 };
       return `
         <tr class="border-b border-gray-100 text-xs">
           <td class="py-1.5 px-2 text-gray-400">${pos+1}°</td>
           <td class="py-1.5 px-2 font-medium text-gray-700">${teamName(team)}</td>
+          <td class="py-1.5 px-1 text-center font-bold text-gray-700">${st.pts}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.j}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.g}</td>
           <td class="py-1.5 px-1 text-center text-gray-500">${st.e}</td>
@@ -163,6 +166,7 @@ function renderGroup(letter, groupResult, playerGroup) {
             <tr>
               <th class="py-1 px-2">#</th>
               <th class="py-1 px-2">Equipo</th>
+              <th class="py-1 px-1 text-center font-bold text-gray-600">Pts</th>
               <th class="py-1 px-1 text-center">J</th>
               <th class="py-1 px-1 text-center">G</th>
               <th class="py-1 px-1 text-center">E</th>
@@ -209,16 +213,16 @@ function renderGroup(letter, groupResult, playerGroup) {
 
 // ── Standings stats (J G E P GF GC DG) from predicted matches ────────────────
 function computeTableStats(teams, matches) {
-  const s = Object.fromEntries(teams.map(t => [t, { j:0, g:0, e:0, p:0, gf:0, gc:0 }]));
+  const s = Object.fromEntries(teams.map(t => [t, { pts:0, j:0, g:0, e:0, p:0, gf:0, gc:0 }]));
   for (const { home, away, homeGoals, awayGoals } of matches) {
     if (homeGoals === null || awayGoals === null) continue;
     const hg = Number(homeGoals), ag = Number(awayGoals);
     s[home].j++; s[away].j++;
     s[home].gf += hg; s[home].gc += ag;
     s[away].gf += ag; s[away].gc += hg;
-    if      (hg > ag) { s[home].g++; s[away].p++; }
-    else if (hg < ag) { s[away].g++; s[home].p++; }
-    else              { s[home].e++; s[away].e++; }
+    if      (hg > ag) { s[home].g++; s[away].p++;  s[home].pts += 3; }
+    else if (hg < ag) { s[away].g++; s[home].p++;  s[away].pts += 3; }
+    else              { s[home].e++; s[away].e++;   s[home].pts++;  s[away].pts++; }
   }
   return s;
 }
