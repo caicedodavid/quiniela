@@ -1,0 +1,14 @@
+#!/bin/bash
+# Pre-commit hook: regenerate scores.json before every commit.
+# Runs prerender.py and stages the result automatically.
+
+cd "$(git rev-parse --show-toplevel)"
+
+echo "pre-commit: running prerender.py..."
+if ! python3 prerender.py; then
+  echo "ERROR: prerender.py failed -- commit aborted"
+  exit 1
+fi
+
+git add data/scores.json
+echo "pre-commit: scores.json updated and staged"
