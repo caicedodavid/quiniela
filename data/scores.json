@@ -1,6 +1,11 @@
 {
   "players": [
     {
+      "file": "Alexis Belisario.xlsx",
+      "displayName": "Alexis Belisario",
+      "totalPoints": 0
+    },
+    {
       "file": "Quiniela Alfredo.xlsx",
       "displayName": "Alfredo Arias",
       "totalPoints": 0
@@ -48,6 +53,11 @@
     {
       "file": "luis requena.xlsx",
       "displayName": "Luis \"Aceitunas\" Requena",
+      "totalPoints": 0
+    },
+    {
+      "file": "Luis ortega.xlsx",
+      "displayName": "Luis \"el menor del campo\" Ortega",
       "totalPoints": 0
     },
     {
