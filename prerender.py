@@ -203,18 +203,22 @@ def main():
             -c.get("p4", 0),
             -c.get("p3", 0),
             -c.get("p1", 0),
-            p["displayName"].lower(),
+            p["displayName"].lower(),   # final alphabetical tiebreaker
         )
     players.sort(key=sort_key)
 
-    # Position tracking: read previous positions from existing scores.json
+    # Position tracking: only carry over positions from a run that had real results
+    # (avoids storing the meaningless all-zero pre-game ordering as prevPosition)
     prev_positions = {}
     if OUT.exists():
         try:
             old = json.loads(OUT.read_text(encoding="utf-8"))
-            prev_positions = {p["file"]: p["position"]
-                              for p in old.get("players", [])
-                              if p.get("position") is not None}
+            old_players = old.get("players", [])
+            prev_scored = any(p.get("totalPoints") for p in old_players)
+            if prev_scored:
+                prev_positions = {p["file"]: p["position"]
+                                  for p in old_players
+                                  if p.get("position") is not None}
         except Exception:
             pass
 

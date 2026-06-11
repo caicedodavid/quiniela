@@ -297,12 +297,19 @@ export function renderWelcome(players) {
     'bg-gray-50',                    // 2nd
     'bg-orange-50',                  // 3rd (bronze)
   ];
+  const lastIdx   = players.length - 1;
+  const LAST_BADGE = '<span class="inline-flex gap-0.5 items-center">' +
+    '<span class="inline-block w-5 h-5 rounded-full bg-red-600 text-white text-xs font-black flex items-center justify-center">&#8595;</span>' +
+    '<span class="inline-block w-5 h-5 rounded-full bg-red-600 text-white text-xs font-black flex items-center justify-center">&#8595;</span>' +
+    '<span class="ml-0.5 text-sm">\uD83D\uDCA9</span>' +
+    '</span>';
 
   const rows = players.map((p, idx) => {
     const c      = p.counts ?? {};
     const pts    = p.totalPoints ?? '—';
-    const medal  = MEDALS[idx] ?? '';
-    const rowCls = ROW_CLS[idx] ?? 'bg-white';
+    const isLast = idx === lastIdx;
+    const medal  = isLast ? LAST_BADGE : (MEDALS[idx] ?? '');
+    const rowCls = isLast ? 'bg-red-50' : (ROW_CLS[idx] ?? 'bg-white');
     const rank   = medal
       ? `<span class="text-base leading-none">${medal}</span>`
       : `<span class="text-gray-400 text-sm">${idx + 1}</span>`;
