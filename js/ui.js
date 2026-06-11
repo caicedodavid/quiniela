@@ -320,8 +320,9 @@ export function renderWelcome(players) {
   }).join('');
 
   // Copy-to-clipboard text: enumerated list with pts to the left
+  const stripQuotes = name => name.replace(/"[^"]*"/g, '').replace(/\s+/g, ' ').trim();
   const copyText = players
-    .map((p, i) => `${i + 1}. ${p.totalPoints ?? 0}pts \u2014 ${p.displayName}`)
+    .map((p, i) => `${i + 1}. ${p.totalPoints ?? 0}pts \u2014 ${stripQuotes(p.displayName)}`)
     .join('\n');
 
   document.getElementById('main-content').innerHTML = `
