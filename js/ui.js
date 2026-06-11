@@ -293,26 +293,43 @@ export function renderWelcome(players) {
     '<span class="inline-block w-6 h-6 rounded-full bg-orange-400 text-white     text-xs font-black flex items-center justify-center">3</span>',
   ];
   const ROW_CLS = [
-    'bg-yellow-50  font-semibold',   // 1st
-    'bg-gray-50',                    // 2nd
-    'bg-orange-50',                  // 3rd (bronze)
+    'bg-yellow-50 font-semibold',
+    'bg-gray-50',
+    'bg-orange-50',
   ];
-  const lastIdx   = players.length - 1;
-  const LAST_BADGE = '<span class="inline-flex gap-0.5 items-center">' +
-    '<span class="inline-block w-5 h-5 rounded-full bg-red-600 text-white text-xs font-black flex items-center justify-center">&#8595;</span>' +
-    '<span class="inline-block w-5 h-5 rounded-full bg-red-600 text-white text-xs font-black flex items-center justify-center">&#8595;</span>' +
-    '<span class="ml-0.5 text-sm">\uD83D\uDCA9</span>' +
-    '</span>';
+  const DANGER_ROW = [
+    'bg-[#c19a6b]',   // last       (fromBot=0)
+    'bg-red-50/60',   // 2nd-last   (fromBot=1) — uses 16’s old bg
+    'bg-red-50/60',   // 3rd-last   (fromBot=2) — unchanged
+  ];
+  const lastIdx = players.length - 1;
 
   const rows = players.map((p, idx) => {
-    const c      = p.counts ?? {};
-    const pts    = p.totalPoints ?? '—';
-    const isLast = idx === lastIdx;
-    const medal  = isLast ? LAST_BADGE : (MEDALS[idx] ?? '');
-    const rowCls = isLast ? 'bg-red-50' : (ROW_CLS[idx] ?? 'bg-white');
-    const rank   = medal
-      ? `<span class="text-base leading-none">${medal}</span>`
+    const c       = p.counts ?? {};
+    const pts     = p.totalPoints ?? '\u2014';
+    const fromBot = lastIdx - idx;
+    const bot3    = fromBot <= 2;
+    const top3    = idx <= 2;
+
+    let badge = '';
+    if (top3) {
+      badge = MEDALS[idx];
+    } else if (bot3) {
+      if (fromBot === 0) {
+        // last: plain number + poop, no circle
+        badge = `<span class="text-gray-600 text-sm font-semibold">${idx + 1}</span><span class="text-base ml-0.5">\uD83D\uDCA9</span>`;
+      } else {
+        // 2nd-last: deeper red circle; 3rd-last: softer red circle
+        const bg = fromBot === 1 ? 'bg-red-500' : 'bg-red-500';
+        badge = `<span class="inline-flex min-w-[1.5rem] h-6 px-1 rounded-full ${bg} text-white text-xs font-black items-center justify-center">${idx + 1}</span>`;
+      }
+    }
+
+    const rowCls = bot3 ? DANGER_ROW[fromBot] : (ROW_CLS[idx] ?? 'bg-white');
+    const rank   = badge
+      ? `<span class="inline-flex items-center gap-0.5 leading-none">${badge}</span>`
       : `<span class="text-gray-400 text-sm">${idx + 1}</span>`;
+
     return `
       <tr class="${rowCls} border-b border-gray-100 hover:brightness-95 transition-all">
         <td class="py-2.5 px-3 text-center w-10">${rank}</td>

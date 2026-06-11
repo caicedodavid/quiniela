@@ -73,6 +73,32 @@ cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 
 ---
 
+## Committing without running prerender
+
+The pre-commit hook runs `prerender.py` on **every** commit, which:
+- Re-scores all players
+- Writes a fresh `scores.json`
+- **Stores current positions as `prevPosition`** for the next run's up/down tracking
+
+For **UI-only changes** (JS, HTML, CSS) where you don't want to touch scores or
+freeze positions, skip the hook entirely:
+
+```bash
+git add js/ui.js               # or whatever files changed
+git commit --no-verify -m "ui: your message"
+git push
+```
+
+`--no-verify` skips all pre-commit hooks. Use it any time you're not changing
+`master.xlsx` or player files. You'll still need to run `python3 prerender.py`
+manually if you want a local scores refresh.
+
+> **Rule of thumb:** only do a normal `git commit` (with hook) when you have
+> updated real match results in `master.xlsx` or added/changed a player file.
+> Everything else gets `--no-verify`.
+
+---
+
 ## Updating real results
 
 1. Open `data/master.xlsx` → fill **AC** (home goals) and **AD** (away goals) for

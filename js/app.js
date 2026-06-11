@@ -24,7 +24,7 @@ let activeFile = null;
 async function init() {
   let scores;
   try {
-    const res = await fetch(SCORES_PATH);
+    const res = await fetch(`${SCORES_PATH}?t=${Date.now()}`);
     if (!res.ok) throw new Error(`scores.json: ${res.status}`);
     scores = await res.json();
   } catch (e) {
@@ -35,9 +35,12 @@ async function init() {
 
   // Players arrive pre-sorted by points from prerender.py
   players = scores.players.map(p => ({
-    file:        p.file,
-    displayName: p.displayName,
-    totalPoints: p.totalPoints,   // already computed at build time
+    file:         p.file,
+    displayName:  p.displayName,
+    totalPoints:  p.totalPoints,
+    counts:       p.counts       ?? null,
+    position:     p.position     ?? null,
+    prevPosition: p.prevPosition ?? null,
   }));
 
   renderSidebar(players, null);
