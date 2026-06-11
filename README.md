@@ -75,27 +75,27 @@ cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 
 ## Committing without running prerender
 
-The pre-commit hook runs `prerender.py` on **every** commit, which:
-- Re-scores all players
-- Writes a fresh `scores.json`
-- **Stores current positions as `prevPosition`** for the next run's up/down tracking
+The pre-commit hook is **smart** — it only runs `prerender.py` when an `.xlsx`
+file is part of the staged changes:
 
-For **UI-only changes** (JS, HTML, CSS) where you don't want to touch scores or
-freeze positions, skip the hook entirely:
+| What you staged | Hook behaviour |
+|----------------|----------------|
+| `master.xlsx` or any player `.xlsx` | Runs prerender, updates `scores.json`, saves positions |
+| JS / HTML / CSS / docs only | Skips prerender entirely — positions stay untouched |
+
+So a normal commit is almost always fine:
 
 ```bash
-git add js/ui.js               # or whatever files changed
-git commit --no-verify -m "ui: your message"
-git push
+git add -A && git commit -m "your message" && git push
 ```
 
-`--no-verify` skips all pre-commit hooks. Use it any time you're not changing
-`master.xlsx` or player files. You'll still need to run `python3 prerender.py`
-manually if you want a local scores refresh.
+The hook self-selects. You only need `--no-verify` if you explicitly want to
+skip the hook for some other reason (rare).
 
-> **Rule of thumb:** only do a normal `git commit` (with hook) when you have
-> updated real match results in `master.xlsx` or added/changed a player file.
-> Everything else gets `--no-verify`.
+> **For Code Puppy:** always check `git diff --cached --name-only` before
+> deciding whether prerender needs to run. If no `.xlsx` file is staged,
+> use a normal commit — the hook will skip prerender automatically.
+> Never run prerender manually just because you're committing UI changes.
 
 ---
 

@@ -1,14 +1,18 @@
 #!/bin/bash
-# Pre-commit hook: regenerate scores.json before every commit.
-# Runs prerender.py and stages the result automatically.
+# Pre-commit hook: only runs prerender.py when xlsx files are staged.
+# If only JS/HTML/CSS/docs changed, skips prerender to avoid freezing
+# player positions in scores.json unnecessarily.
 
 cd "$(git rev-parse --show-toplevel)"
 
-echo "pre-commit: running prerender.py..."
-if ! python3 prerender.py; then
-  echo "ERROR: prerender.py failed -- commit aborted"
-  exit 1
+if git diff --cached --name-only | grep -q '\.xlsx$'; then
+  echo "pre-commit: xlsx change detected -- running prerender.py..."
+  if ! python3 prerender.py; then
+    echo "ERROR: prerender.py failed -- commit aborted"
+    exit 1
+  fi
+  git add data/scores.json
+  echo "pre-commit: scores.json updated and staged"
+else
+  echo "pre-commit: no xlsx changes -- skipping prerender"
 fi
-
-git add data/scores.json
-echo "pre-commit: scores.json updated and staged"
