@@ -277,13 +277,117 @@ export function renderError(msg) {
     </div>`;
 }
 
-export function renderWelcome() {
+export function renderWelcome(players) {
+  // Header colours matching the ptsBadge palette
+  const H = {
+    p6: 'bg-green-500  text-white',
+    p4: 'bg-yellow-400 text-yellow-900',
+    p3: 'bg-yellow-200 text-yellow-800',
+    p1: 'bg-red-400    text-white',
+    p0: 'bg-red-700    text-white',
+  };
+
+  const MEDALS = [
+    '<span class="inline-block w-6 h-6 rounded-full bg-yellow-400 text-yellow-900 text-xs font-black flex items-center justify-center">1</span>',
+    '<span class="inline-block w-6 h-6 rounded-full bg-gray-300  text-gray-700  text-xs font-black flex items-center justify-center">2</span>',
+    '<span class="inline-block w-6 h-6 rounded-full bg-orange-400 text-white     text-xs font-black flex items-center justify-center">3</span>',
+  ];
+  const ROW_CLS = [
+    'bg-yellow-50  font-semibold',   // 1st
+    'bg-gray-50',                    // 2nd
+    'bg-orange-50',                  // 3rd (bronze)
+  ];
+
+  const rows = players.map((p, idx) => {
+    const c      = p.counts ?? {};
+    const pts    = p.totalPoints ?? '—';
+    const medal  = MEDALS[idx] ?? '';
+    const rowCls = ROW_CLS[idx] ?? 'bg-white';
+    const rank   = medal
+      ? `<span class="text-base leading-none">${medal}</span>`
+      : `<span class="text-gray-400 text-sm">${idx + 1}</span>`;
+    return `
+      <tr class="${rowCls} border-b border-gray-100 hover:brightness-95 transition-all">
+        <td class="py-2.5 px-3 text-center w-10">${rank}</td>
+        <td class="py-2.5 px-3 text-sm">${p.displayName}</td>
+        <td class="py-2.5 px-3 text-center font-mono font-bold text-sm border-l border-gray-200">${pts}</td>
+        <td class="py-2 px-2 text-center text-sm">${c.p6 ?? 0}</td>
+        <td class="py-2 px-2 text-center text-sm">${c.p4 ?? 0}</td>
+        <td class="py-2 px-2 text-center text-sm">${c.p3 ?? 0}</td>
+        <td class="py-2 px-2 text-center text-sm">${c.p1 ?? 0}</td>
+        <td class="py-2 px-2 text-center text-sm">${c.p0 ?? 0}</td>
+      </tr>`;
+  }).join('');
+
+  // Copy-to-clipboard text: enumerated list with pts to the left
+  const copyText = players
+    .map((p, i) => `${i + 1}. ${p.totalPoints ?? 0}pts \u2014 ${p.displayName}`)
+    .join('\n');
+
   document.getElementById('main-content').innerHTML = `
-    <div class="flex flex-col items-center justify-center h-full text-gray-400 gap-4 py-24">
-      <span class="text-7xl">⚽</span>
-      <p class="text-xl font-semibold text-gray-500">Mundial 2026</p>
-      <p class="text-sm">Selecciona un participante del menú para ver sus predicciones</p>
+    <!-- Hero banner -->
+    <div class="bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-5 md:p-7 text-white shadow-lg mb-6">
+      <p class="text-green-300 text-xs uppercase tracking-widest font-semibold mb-1">Fase de Grupos</p>
+      <h1 class="text-2xl md:text-3xl font-extrabold mb-1">Quiniela Mundial 2026</h1>
+      <p class="text-green-300 text-sm">${players.length} participantes</p>
+    </div>
+
+    <div class="max-w-2xl mx-auto">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Clasificación general</h2>
+        <button id="copy-standings-btn"
+          class="flex items-center gap-1.5 text-xs bg-white border border-gray-300
+                 hover:border-green-500 hover:text-green-700 text-gray-500
+                 px-3 py-1.5 rounded-lg transition-colors font-medium shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          Copiar tabla
+        </button>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="bg-gray-800 text-xs uppercase tracking-wide">
+              <th class="py-2.5 px-3 text-gray-400 w-10">#</th>
+              <th class="py-2.5 px-3 text-gray-300">Participante</th>
+              <th class="py-2.5 px-3 text-center text-white font-bold border-l border-gray-600">Pts</th>
+              <th class="py-2.5 px-2 text-center ${H.p6}">6P</th>
+              <th class="py-2.5 px-2 text-center ${H.p4}">4P</th>
+              <th class="py-2.5 px-2 text-center ${H.p3}">3P</th>
+              <th class="py-2.5 px-2 text-center ${H.p1}">1P</th>
+              <th class="py-2.5 px-2 text-center ${H.p0}">0P</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+
+      <p class="text-xs text-gray-400 mt-3 text-center">
+        Desempate: Pts &rarr; 6P &rarr; 4P &rarr; 3P &rarr; 1P
+      </p>
     </div>`;
+
+  document.getElementById('copy-standings-btn').addEventListener('click', () => {
+    navigator.clipboard.writeText(copyText).then(() => {
+      const btn = document.getElementById('copy-standings-btn');
+      btn.textContent = 'Copiado!';
+      btn.classList.add('text-green-700', 'border-green-500');
+      setTimeout(() => {
+        btn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          Copiar tabla`;
+        btn.classList.remove('text-green-700', 'border-green-500');
+      }, 2000);
+    });
+  });
 }
 
 // ── Sidebar + mobile select ─────────────────────────────────────────────

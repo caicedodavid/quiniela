@@ -41,7 +41,7 @@ async function init() {
   }));
 
   renderSidebar(players, null);
-  renderWelcome();
+  renderWelcome(players);
 
   // Wire up desktop sidebar buttons
   document.getElementById('player-list').addEventListener('click', e => {

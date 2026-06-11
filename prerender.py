@@ -121,11 +121,16 @@ def compute_standings(teams, matches):
 
 def score_player(player_groups, master_groups):
     total = 0
+    counts = {"p6": 0, "p4": 0, "p3": 0, "p1": 0, "p0": 0}
     for pg, mg in zip(player_groups, master_groups):
         for pm, mm in zip(pg["matches"], mg["matches"]):
             pts = score_match(pm["homeGoals"], pm["awayGoals"],
                               mm["homeGoals"], mm["awayGoals"])
-            total += pts or 0
+            if pts is not None:          # skip unplayed matches
+                total += pts
+                key = f"p{pts}"
+                if key in counts:
+                    counts[key] += 1
 
         group_done = all(m["homeGoals"] is not None for m in mg["matches"])
         if group_done:
@@ -134,7 +139,7 @@ def score_player(player_groups, master_groups):
             for pos in range(4):
                 if pred_s[pos] == real_s[pos]:
                     total += BONUS_PER_POS
-    return total
+    return total, counts
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -174,26 +179,48 @@ def main():
         fallback = display_name(path.name)
         try:
             excel_name, pg = parse_groups(path)
-            # Priority: nicknames.json > Home!C10 > filename
             name = nicknames.get(path.name, excel_name)
             if master_groups:
-                pts = score_player(pg, master_groups)
+                pts, counts = score_player(pg, master_groups)
                 print(f"  {name}: {pts} pts")
             else:
-                pts = None
+                pts, counts = None, None
                 print(f"  {name}: pendiente")
         except Exception as e:
             name = nicknames.get(path.name, fallback)
             print(f"    {name}: error — {e}")
-            pts = None
-        players.append({"file": path.name, "displayName": name, "totalPoints": pts})
+            pts, counts = None, None
+        players.append({"file": path.name, "displayName": name,
+                        "totalPoints": pts, "counts": counts})
 
-    # Sort: scored players by pts desc, then unscored alphabetically at bottom
-    players.sort(key=lambda p: (
-        p["totalPoints"] is None,          # None → goes to bottom
-        -(p["totalPoints"] or 0),
-        p["displayName"].lower(),
-    ))
+    # Tiebreaker: pts desc -> p6 desc -> p4 desc -> p3 desc -> p1 desc -> name asc
+    def sort_key(p):
+        c = p["counts"] or {}
+        return (
+            p["totalPoints"] is None,
+            -(p["totalPoints"] or 0),
+            -c.get("p6", 0),
+            -c.get("p4", 0),
+            -c.get("p3", 0),
+            -c.get("p1", 0),
+            p["displayName"].lower(),
+        )
+    players.sort(key=sort_key)
+
+    # Position tracking: read previous positions from existing scores.json
+    prev_positions = {}
+    if OUT.exists():
+        try:
+            old = json.loads(OUT.read_text(encoding="utf-8"))
+            prev_positions = {p["file"]: p["position"]
+                              for p in old.get("players", [])
+                              if p.get("position") is not None}
+        except Exception:
+            pass
+
+    for rank, p in enumerate(players, start=1):
+        p["position"]     = rank
+        p["prevPosition"] = prev_positions.get(p["file"])  # None on first run
 
     OUT.write_text(json.dumps({"players": players}, ensure_ascii=False, indent=2))
     print(f"scores.json written -- {len(players)} participant(s)")
