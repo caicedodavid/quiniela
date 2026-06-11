@@ -56,6 +56,16 @@ async function init() {
   document.getElementById('mobile-player-select').addEventListener('change', e => {
     if (e.target.value) selectPlayer(e.target.value);
   });
+
+  // Logo buttons → go home
+  const goHome = () => {
+    activeFile = null;
+    renderSidebar(players, null);
+    renderWelcome(players);
+    document.getElementById('mobile-player-select').value = '';
+  };
+  document.getElementById('mobile-home-btn').addEventListener('click', goHome);
+  document.getElementById('desktop-home-btn').addEventListener('click', goHome);
 }
 
 // ── Resilient fetch — retries up to 3x with 800 ms back-off ─────────────────
