@@ -77,8 +77,6 @@ async function init() {
   document.getElementById('mobile-home-btn').addEventListener('click', goHome);
   document.getElementById('desktop-home-btn').addEventListener('click', goHome);
 }
-
-// ── Resilient fetch — retries up to 3x with 800 ms back-off ─────────────────
 // Excel does an atomic rename on save; the file can vanish for ~500 ms.
 async function fetchWithRetry(url, retries = 3, delayMs = 800) {
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -164,3 +162,15 @@ function buildEmptyMaster(playerData) {
 }
 
 init();
+
+// ── Home button — wired outside init() so it always attaches ─────────────────
+// (init is async; if it throws before the listeners, clicks would be dead)
+function goHome() {
+  activeFile = null;
+  renderSidebar(players, null);
+  renderWelcome(players);
+  const sel = document.getElementById('mobile-player-select');
+  if (sel) sel.value = '';
+}
+document.getElementById('mobile-home-btn').addEventListener('click', goHome);
+document.getElementById('desktop-home-btn').addEventListener('click', goHome);
