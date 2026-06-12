@@ -305,7 +305,7 @@ export function renderError(msg) {
     </div>`;
 }
 
-export function renderWelcome(players, onSelect = null) {
+export function renderWelcome(players) {
   // Header colours matching the ptsBadge palette
   const H = {
     p6: 'bg-green-500  text-white',
@@ -382,10 +382,7 @@ export function renderWelcome(players, onSelect = null) {
         <td class="py-2.5 px-2 text-center w-10">${rank}</td>
         <td class="py-2.5 px-1 text-center w-8">${mov}</td>
         <td class="py-2.5 px-3 text-sm">
-          ${onSelect
-            ? `<button class="player-link text-left hover:text-green-700 hover:underline transition-colors" data-file="${p.file}">${p.displayName}</button>`
-            : p.displayName
-          }
+          ${`<button class="player-link text-left hover:text-green-700 hover:underline transition-colors" data-file="${p.file}">${p.displayName}</button>`}
         </td>
         <td class="py-2.5 px-3 text-center font-mono font-bold text-sm border-l border-gray-200">${pts}</td>
         <td class="py-2 px-2 text-center text-sm">${c.p6 ?? 0}</td>
@@ -449,14 +446,6 @@ export function renderWelcome(players, onSelect = null) {
         Desempate: Pts &rarr; 6P &rarr; 4P &rarr; 3P &rarr; 1P
       </p>
     </div>`;
-
-  // Player name links → load their profile
-  if (onSelect) {
-    document.getElementById('main-content').addEventListener('click', e => {
-      const link = e.target.closest('.player-link');
-      if (link) onSelect(link.dataset.file);
-    }, { once: true });
-  }
 
   document.getElementById('copy-standings-btn').addEventListener('click', () => {
     navigator.clipboard.writeText(copyText).then(() => {

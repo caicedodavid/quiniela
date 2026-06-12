@@ -54,12 +54,18 @@ async function init() {
   }));
 
   renderSidebar(players, null);
-  renderWelcome(players, selectPlayer);
+  renderWelcome(players);
 
   // Wire up desktop sidebar buttons
   document.getElementById('player-list').addEventListener('click', e => {
     const btn = e.target.closest('.player-btn');
     if (btn) selectPlayer(btn.dataset.file);
+  });
+
+  // Player name links in the leaderboard table (delegated, permanent)
+  document.getElementById('main-content').addEventListener('click', e => {
+    const link = e.target.closest('.player-link');
+    if (link) selectPlayer(link.dataset.file);
   });
 
   // Wire up mobile player select
@@ -168,7 +174,7 @@ init();
 function goHome() {
   activeFile = null;
   renderSidebar(players, null);
-  renderWelcome(players, selectPlayer);
+  renderWelcome(players);
   const sel = document.getElementById('mobile-player-select');
   if (sel) sel.value = '';
 }
