@@ -6,7 +6,7 @@ MASTER="data/master.xlsx"
 cd "$(dirname "$0")"   # always run from project root
 
 echo "Calculando puntos y actualizando scores.json..."
-python3 prerender.py --no-position-update
+python3 prerender.py
 
 echo "Mundial 2026 -- http://localhost:$PORT (Ctrl+C para detener)"
 
@@ -19,7 +19,7 @@ echo "Mundial 2026 -- http://localhost:$PORT (Ctrl+C para detener)"
     if [ "$cur_mtime" != "$last_mtime" ]; then
       echo ""
       echo "master.xlsx changed -- recalculando puntos..."
-      python3 prerender.py --no-position-update
+      python3 prerender.py
       last_mtime=$cur_mtime
     fi
   done

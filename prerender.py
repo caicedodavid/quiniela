@@ -156,8 +156,6 @@ def load_nicknames():
 
 
 def main():
-    import sys
-    update_positions = "--no-position-update" not in sys.argv
     nicknames = load_nicknames()
     # Load master results (optional — no master = all pending)
     master_groups = None
@@ -209,25 +207,42 @@ def main():
         )
     players.sort(key=sort_key)
 
-    # Position tracking: only carry over positions from a run that had real results
-    # (avoids storing the meaningless all-zero pre-game ordering as prevPosition)
-    # Skip entirely when called with --no-position-update (e.g. from serve.sh watcher)
-    prev_positions = {}
-    if update_positions and OUT.exists():
+    # Position history: append new position only if something actually changed.
+    # This naturally handles double-runs (serve.sh, manual runs) — if no result
+    # changed, positions won't change, so nothing gets appended.
+    history_map = {}  # file -> list of past positions (oldest first)
+    if OUT.exists():
         try:
             old = json.loads(OUT.read_text(encoding="utf-8"))
-            old_players = old.get("players", [])
-            prev_scored = any(p.get("totalPoints") for p in old_players)
-            if prev_scored:
-                prev_positions = {p["file"]: p["position"]
-                                  for p in old_players
-                                  if p.get("position") is not None}
+            for p in old.get("players", []):
+                hist = p.get("positionHistory")
+                # back-compat: migrate legacy prevPosition into a 2-entry list
+                if not hist and p.get("position") is not None:
+                    prev = p.get("prevPosition")
+                    hist = ([prev, p["position"]] if prev and prev != p["position"]
+                            else [p["position"]])
+                history_map[p["file"]] = hist or []
         except Exception:
             pass
 
+    # Assign current rank
     for rank, p in enumerate(players, start=1):
-        p["position"]     = rank
-        p["prevPosition"] = prev_positions.get(p["file"])  # None on first run
+        p["position"] = rank
+
+    # Only append to history if at least one player changed position
+    any_changed = any(
+        p["position"] != (history_map.get(p["file"]) or [None])[-1]
+        for p in players
+    )
+    any_scored = any(p.get("totalPoints") for p in players)
+
+    for p in players:
+        hist = list(history_map.get(p["file"]) or [])
+        if any_changed and any_scored:
+            hist.append(p["position"])
+        p["positionHistory"] = hist
+        # Convenience fields for the UI (last two entries)
+        p["prevPosition"] = hist[-2] if len(hist) >= 2 else None
 
     OUT.write_text(json.dumps({"players": players}, ensure_ascii=False, indent=2))
     print(f"scores.json written -- {len(players)} participant(s)")

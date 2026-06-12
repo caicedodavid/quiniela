@@ -45,12 +45,12 @@ async function init() {
 
   // Players arrive pre-sorted by points from prerender.py
   players = scores.players.map(p => ({
-    file:         p.file,
-    displayName:  p.displayName,
-    totalPoints:  p.totalPoints,
-    counts:       p.counts       ?? null,
-    position:     p.position     ?? null,
-    prevPosition: p.prevPosition ?? null,
+    file:            p.file,
+    displayName:     p.displayName,
+    totalPoints:     p.totalPoints,
+    counts:          p.counts          ?? null,
+    position:        p.position        ?? null,
+    positionHistory: p.positionHistory ?? [],
   }));
 
   renderSidebar(players, null);

@@ -360,10 +360,12 @@ export function renderWelcome(players, onSelect = null) {
       ? `<span class="inline-flex items-center gap-0.5 leading-none">${badge}</span>`
       : `<span class="text-gray-400 text-sm">${idx + 1}</span>`;
 
-    // Movement indicator
+    // Movement indicator (last two entries of positionHistory)
+    const hist = p.positionHistory ?? [];
+    const prevPos = hist.length >= 2 ? hist[hist.length - 2] : null;
     let mov = '<span class="text-gray-300 text-xs">&mdash;</span>';
-    if (p.prevPosition != null) {
-      const diff = p.prevPosition - p.position; // positive = moved up
+    if (prevPos != null) {
+      const diff = prevPos - p.position; // positive = moved up
       if (diff > 0) {
         mov = `<span class="inline-flex items-center gap-0.5 text-green-600 text-xs font-bold">
                  <span>&#8593;</span><span>${diff}</span>
