@@ -54,7 +54,7 @@ async function init() {
   }));
 
   renderSidebar(players, null);
-  renderWelcome(players);
+  renderWelcome(players, selectPlayer);
 
   // Wire up desktop sidebar buttons
   document.getElementById('player-list').addEventListener('click', e => {
@@ -168,7 +168,7 @@ init();
 function goHome() {
   activeFile = null;
   renderSidebar(players, null);
-  renderWelcome(players);
+  renderWelcome(players, selectPlayer);
   const sel = document.getElementById('mobile-player-select');
   if (sel) sel.value = '';
 }
