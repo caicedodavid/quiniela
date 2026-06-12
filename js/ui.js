@@ -360,9 +360,25 @@ export function renderWelcome(players) {
       ? `<span class="inline-flex items-center gap-0.5 leading-none">${badge}</span>`
       : `<span class="text-gray-400 text-sm">${idx + 1}</span>`;
 
+    // Movement indicator
+    let mov = '<span class="text-gray-300 text-xs">&mdash;</span>';
+    if (p.prevPosition != null) {
+      const diff = p.prevPosition - p.position; // positive = moved up
+      if (diff > 0) {
+        mov = `<span class="inline-flex items-center gap-0.5 text-green-600 text-xs font-bold">
+                 <span>&#8593;</span><span>${diff}</span>
+               </span>`;
+      } else if (diff < 0) {
+        mov = `<span class="inline-flex items-center gap-0.5 text-red-500 text-xs font-bold">
+                 <span>&#8595;</span><span>${Math.abs(diff)}</span>
+               </span>`;
+      }
+    }
+
     return `
       <tr class="${rowCls} border-b border-gray-100 hover:brightness-95 transition-all">
-        <td class="py-2.5 px-3 text-center w-10">${rank}</td>
+        <td class="py-2.5 px-2 text-center w-10">${rank}</td>
+        <td class="py-2.5 px-1 text-center w-8">${mov}</td>
         <td class="py-2.5 px-3 text-sm">${p.displayName}</td>
         <td class="py-2.5 px-3 text-center font-mono font-bold text-sm border-l border-gray-200">${pts}</td>
         <td class="py-2 px-2 text-center text-sm">${c.p6 ?? 0}</td>
@@ -407,7 +423,8 @@ export function renderWelcome(players) {
         <table class="w-full text-left">
           <thead>
             <tr class="bg-gray-800 text-xs uppercase tracking-wide">
-              <th class="py-2.5 px-3 text-gray-400 w-10">#</th>
+              <th class="py-2.5 px-2 text-gray-400 w-10">#</th>
+              <th class="py-2.5 px-1 w-8"></th>
               <th class="py-2.5 px-3 text-gray-300">Participante</th>
               <th class="py-2.5 px-3 text-center text-white font-bold border-l border-gray-600">Pts</th>
               <th class="py-2.5 px-2 text-center ${H.p6}">6P</th>
