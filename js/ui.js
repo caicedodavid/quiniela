@@ -241,8 +241,10 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
 
   document.getElementById('main-content').innerHTML = `
     <!-- Encabezado del jugador -->
-    <div class="mb-4 md:mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-4 md:p-5 text-white shadow-lg">
-      <div class="flex items-center gap-4">
+    <div class="mb-4 md:mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-4 md:p-6 text-white shadow-lg">
+
+      <!-- Top row: photo · name+description · points -->
+      <div class="flex items-start gap-4">
 
         <!-- Photo / initials avatar -->
         <div class="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-green-700 flex items-center justify-center">
@@ -261,21 +263,22 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
 
         <!-- Name + description -->
         <div class="flex-1 min-w-0">
-          <p class="text-green-300 text-xs uppercase tracking-widest font-semibold leading-none mb-0.5">Quiniela de</p>
-          <h1 class="text-base md:text-xl font-extrabold leading-tight truncate">${playerName}</h1>
-          ${description
-            ? `<p class="text-green-200 text-xs mt-1.5 leading-snug">${description}</p>`
-            : `<p class="text-green-600 text-xs mt-1.5 italic"></p>`
-          }
+          <h1 class="text-sm md:text-base font-extrabold leading-tight mb-1.5">${playerName}</h1>
+          ${description ? `
+            <div class="max-h-16 overflow-y-auto pr-1"
+                 style="scrollbar-width: thin; scrollbar-color: #16a34a transparent;">
+              <p class="text-green-200 text-xs leading-relaxed whitespace-pre-line">${description}</p>
+            </div>` : ''}
         </div>
 
         <!-- Total points -->
         <div class="text-right flex-shrink-0 pl-2">
-          <span class="text-4xl md:text-5xl font-black leading-none">${totalPoints}</span>
-          <p class="text-green-300 text-xs mt-0.5">puntos</p>
+          <span class="text-5xl md:text-6xl font-black leading-none">${totalPoints}</span>
+          <p class="text-green-300 text-lg md:text-xl mt-0.5">pts</p>
         </div>
 
       </div>
+
     </div>
 
     <!-- Grupos -->
@@ -321,11 +324,13 @@ export function renderWelcome(players) {
     'bg-yellow-50 font-semibold',
     'bg-gray-50',
     'bg-orange-50',
+    'bg-teal-50',   // 4th
+    'bg-teal-50',   // 5th
   ];
   const DANGER_ROW = [
-    'bg-[#c19a6b]',   // last       (fromBot=0)
-    'bg-red-50/60',   // 2nd-last   (fromBot=1) — uses 16’s old bg
-    'bg-red-50/60',   // 3rd-last   (fromBot=2) — unchanged
+    'bg-[#c19a6b]',
+    'bg-red-50/60',
+    'bg-red-50/60',
   ];
   const lastIdx = players.length - 1;
 
@@ -334,19 +339,19 @@ export function renderWelcome(players) {
     const pts     = p.totalPoints ?? '\u2014';
     const fromBot = lastIdx - idx;
     const bot3    = fromBot <= 2;
+    const top5    = idx <= 4;
     const top3    = idx <= 2;
 
     let badge = '';
     if (top3) {
       badge = MEDALS[idx];
+    } else if (idx === 3 || idx === 4) {
+      badge = `<span class="inline-flex min-w-[1.5rem] h-6 px-1 rounded-full bg-teal-500 text-white text-xs font-black items-center justify-center">${idx + 1}</span>`;
     } else if (bot3) {
       if (fromBot === 0) {
-        // last: plain number + poop, no circle
         badge = `<span class="text-gray-600 text-sm font-semibold">${idx + 1}</span><span class="text-base ml-0.5">\uD83D\uDCA9</span>`;
       } else {
-        // 2nd-last: deeper red circle; 3rd-last: softer red circle
-        const bg = fromBot === 1 ? 'bg-red-500' : 'bg-red-500';
-        badge = `<span class="inline-flex min-w-[1.5rem] h-6 px-1 rounded-full ${bg} text-white text-xs font-black items-center justify-center">${idx + 1}</span>`;
+        badge = `<span class="inline-flex min-w-[1.5rem] h-6 px-1 rounded-full bg-red-500 text-white text-xs font-black items-center justify-center">${idx + 1}</span>`;
       }
     }
 
