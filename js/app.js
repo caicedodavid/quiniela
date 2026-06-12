@@ -14,19 +14,25 @@ window._parserModule = { computeStandings };
 const bonusLabel = document.getElementById('bonus-label');
 if (bonusLabel) bonusLabel.textContent = `${BONUS_PER_POSITION} pt${BONUS_PER_POSITION === 1 ? '' : 's'}`;
 
-const MASTER_PATH   = 'data/master.xlsx';
-const SCORES_PATH   = 'data/scores.json';
+const MASTER_PATH       = 'data/master.xlsx';
+const SCORES_PATH       = 'data/scores.json';
+const DESCRIPTIONS_PATH = 'data/descriptions.json';
 
-let players = [];             // [{ file, displayName, totalPoints }]
-let activeFile = null;
+let players      = [];
+let descriptions = {};
+let activeFile   = null;
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function init() {
   let scores;
   try {
-    const res = await fetch(`${SCORES_PATH}?t=${Date.now()}`);
-    if (!res.ok) throw new Error(`scores.json: ${res.status}`);
-    scores = await res.json();
+    const [scoresRes, descRes] = await Promise.all([
+      fetch(`${SCORES_PATH}?t=${Date.now()}`),
+      fetch(`${DESCRIPTIONS_PATH}?t=${Date.now()}`),
+    ]);
+    if (!scoresRes.ok) throw new Error(`scores.json: ${scoresRes.status}`);
+    scores       = await scoresRes.json();
+    descriptions = descRes.ok ? await descRes.json() : {};
   } catch (e) {
     document.getElementById('player-list').innerHTML =
       `<li class="px-4 py-3 text-red-400 text-sm">Error cargando participantes: ${e.message}</li>`;
@@ -111,8 +117,10 @@ async function selectPlayer(file) {
     ]);
     const playerData = parseWorkbook(playerBuf, nickname);
     const effectiveMaster = master ?? buildEmptyMaster(playerData);
+    const photoUrl    = `data/photos/${file.replace(/\.xlsx$/i, '')}.jpg`;
+    const description = descriptions[file] ?? '';
 
-    renderPlayerView(playerData, effectiveMaster, nickname);
+    renderPlayerView(playerData, effectiveMaster, nickname, photoUrl, description);
 
     // Update total pts in sidebar
     const idx = players.findIndex(p => p.file === file);

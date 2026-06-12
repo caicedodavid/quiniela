@@ -225,7 +225,7 @@ function computeTableStats(teams, matches) {
 }
 
 // ── Main content area ─────────────────────────────────────────────────────────
-export function renderPlayerView(playerData, masterData, playerName) {
+export function renderPlayerView(playerData, masterData, playerName, photoUrl = '', description = '') {
   const groupResults = playerData.groups.map((pg, i) => {
     const mg = masterData.groups[i];
     return { letter: pg.letter, result: scoreGroup(pg, mg), playerGroup: pg };
@@ -241,16 +241,36 @@ export function renderPlayerView(playerData, masterData, playerName) {
 
   document.getElementById('main-content').innerHTML = `
     <!-- Encabezado del jugador -->
-    <div class="mb-4 md:mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-4 md:p-6 text-white shadow-lg">
-      <p class="text-green-300 text-xs uppercase tracking-widest font-semibold mb-1">Quiniela de</p>
-      <h1 class="text-2xl md:text-3xl font-extrabold mb-3">${playerName}</h1>
-      <div class="flex items-end gap-2">
-        <span class="text-5xl md:text-6xl font-black leading-none">${totalPoints}</span>
-        <span class="text-green-300 text-lg md:text-xl mb-1">puntos totales</span>
+    <div class="mb-4 md:mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-4 md:p-5 text-white shadow-lg">
+      <div class="flex items-center gap-4">
+
+        <!-- Photo -->
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-green-700">
+          <img src="${photoUrl}" alt="${playerName}"
+               class="w-full h-full object-cover"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
+          <div class="w-full h-full hidden items-center justify-center text-xl md:text-2xl font-black text-green-400">
+            ${playerName.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase()}
+          </div>
+        </div>
+
+        <!-- Name + description -->
+        <div class="flex-1 min-w-0">
+          <p class="text-green-300 text-xs uppercase tracking-widest font-semibold leading-none mb-0.5">Quiniela de</p>
+          <h1 class="text-base md:text-xl font-extrabold leading-tight truncate">${playerName}</h1>
+          ${description
+            ? `<p class="text-green-200 text-xs mt-1.5 leading-snug">${description}</p>`
+            : `<p class="text-green-600 text-xs mt-1.5 italic"></p>`
+          }
+        </div>
+
+        <!-- Total points -->
+        <div class="text-right flex-shrink-0 pl-2">
+          <span class="text-4xl md:text-5xl font-black leading-none">${totalPoints}</span>
+          <p class="text-green-300 text-xs mt-0.5">puntos</p>
+        </div>
+
       </div>
-      <p class="text-green-400 text-xs mt-2">
-        (bono posiciones: ${BONUS_PER_POSITION} pts por posición correcta al finalizar cada grupo)
-      </p>
     </div>
 
     <!-- Grupos -->
