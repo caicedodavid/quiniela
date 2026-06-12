@@ -156,6 +156,8 @@ def load_nicknames():
 
 
 def main():
+    import sys
+    update_positions = "--no-position-update" not in sys.argv
     nicknames = load_nicknames()
     # Load master results (optional — no master = all pending)
     master_groups = None
@@ -209,8 +211,9 @@ def main():
 
     # Position tracking: only carry over positions from a run that had real results
     # (avoids storing the meaningless all-zero pre-game ordering as prevPosition)
+    # Skip entirely when called with --no-position-update (e.g. from serve.sh watcher)
     prev_positions = {}
-    if OUT.exists():
+    if update_positions and OUT.exists():
         try:
             old = json.loads(OUT.read_text(encoding="utf-8"))
             old_players = old.get("players", [])
