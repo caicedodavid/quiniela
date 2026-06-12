@@ -17,22 +17,26 @@ if (bonusLabel) bonusLabel.textContent = `${BONUS_PER_POSITION} pt${BONUS_PER_PO
 const MASTER_PATH       = 'data/master.xlsx';
 const SCORES_PATH       = 'data/scores.json';
 const DESCRIPTIONS_PATH = 'data/descriptions.json';
+const PHOTOS_PATH       = 'data/photos.json';
 
 let players      = [];
 let descriptions = {};
+let photos       = {};
 let activeFile   = null;
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function init() {
   let scores;
   try {
-    const [scoresRes, descRes] = await Promise.all([
+    const [scoresRes, descRes, photosRes] = await Promise.all([
       fetch(`${SCORES_PATH}?t=${Date.now()}`),
       fetch(`${DESCRIPTIONS_PATH}?t=${Date.now()}`),
+      fetch(`${PHOTOS_PATH}?t=${Date.now()}`),
     ]);
     if (!scoresRes.ok) throw new Error(`scores.json: ${scoresRes.status}`);
     scores       = await scoresRes.json();
-    descriptions = descRes.ok ? await descRes.json() : {};
+    descriptions = descRes.ok   ? await descRes.json()   : {};
+    photos       = photosRes.ok ? await photosRes.json() : {};
   } catch (e) {
     document.getElementById('player-list').innerHTML =
       `<li class="px-4 py-3 text-red-400 text-sm">Error cargando participantes: ${e.message}</li>`;
@@ -117,7 +121,8 @@ async function selectPlayer(file) {
     ]);
     const playerData = parseWorkbook(playerBuf, nickname);
     const effectiveMaster = master ?? buildEmptyMaster(playerData);
-    const photoUrl    = `data/photos/${file.replace(/\.xlsx$/i, '')}.jpg`;
+    const photoFile  = photos[file] ?? '';
+    const photoUrl    = photoFile ? `data/photos/${photoFile}` : '';
     const description = descriptions[file] ?? '';
 
     renderPlayerView(playerData, effectiveMaster, nickname, photoUrl, description);

@@ -244,14 +244,19 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
     <div class="mb-4 md:mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-4 md:p-5 text-white shadow-lg">
       <div class="flex items-center gap-4">
 
-        <!-- Photo -->
-        <div class="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-green-700">
-          <img src="${photoUrl}" alt="${playerName}"
-               class="w-full h-full object-cover"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
-          <div class="w-full h-full hidden items-center justify-center text-xl md:text-2xl font-black text-green-400">
-            ${playerName.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase()}
-          </div>
+        <!-- Photo / initials avatar -->
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-green-700 flex items-center justify-center">
+          ${photoUrl
+            ? `<img src="${photoUrl}" alt="${playerName}"
+                   class="w-full h-full object-cover"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
+               <div class="w-full h-full hidden items-center justify-center text-xl font-black text-green-400">
+                 ${playerName.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase()}
+               </div>`
+            : `<div class="w-full h-full flex items-center justify-center text-xl font-black text-green-400">
+                 ${playerName.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase()}
+               </div>`
+          }
         </div>
 
         <!-- Name + description -->
