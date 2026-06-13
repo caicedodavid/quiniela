@@ -331,9 +331,9 @@ export function renderWelcome(players) {
   };
 
   const MEDALS = [
-    '<span class="inline-block w-6 h-6 rounded-full bg-yellow-400 text-yellow-900 text-xs font-black flex items-center justify-center">1</span>',
-    '<span class="inline-block w-6 h-6 rounded-full bg-gray-300  text-gray-700  text-xs font-black flex items-center justify-center">2</span>',
-    '<span class="inline-block w-6 h-6 rounded-full bg-orange-400 text-white     text-xs font-black flex items-center justify-center">3</span>',
+    '<span class="inline-flex w-5 h-5 rounded-full bg-yellow-400 text-yellow-900 text-[10px] font-black items-center justify-center">1</span>',
+    '<span class="inline-flex w-5 h-5 rounded-full bg-gray-300  text-gray-700  text-[10px] font-black items-center justify-center">2</span>',
+    '<span class="inline-flex w-5 h-5 rounded-full bg-orange-400 text-white     text-[10px] font-black items-center justify-center">3</span>',
   ];
   const ROW_CLS = [
     'bg-yellow-50 font-semibold',
@@ -361,12 +361,12 @@ export function renderWelcome(players) {
     if (top3) {
       badge = MEDALS[idx];
     } else if (idx === 3 || idx === 4) {
-      badge = `<span class="inline-flex min-w-[1.5rem] h-6 px-1 rounded-full bg-teal-500 text-white text-xs font-black items-center justify-center">${idx + 1}</span>`;
+      badge = `<span class="inline-flex w-5 h-5 rounded-full bg-teal-500 text-white text-[10px] font-black items-center justify-center">${idx + 1}</span>`;
     } else if (bot3) {
       if (fromBot === 0) {
         badge = `<span class="text-gray-600 text-sm font-semibold">${idx + 1}</span><span class="text-base ml-0.5">\uD83D\uDCA9</span>`;
       } else {
-        badge = `<span class="inline-flex min-w-[1.5rem] h-6 px-1 rounded-full bg-red-500 text-white text-xs font-black items-center justify-center">${idx + 1}</span>`;
+        badge = `<span class="inline-flex w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black items-center justify-center">${idx + 1}</span>`;
       }
     }
 
@@ -401,7 +401,7 @@ export function renderWelcome(players) {
                   data-file="${p.file}"
                   onclick="window._selectPlayer(this.dataset.file)">${p.displayName}</button>
         </td>
-        <td class="py-2.5 px-3 text-center font-mono font-bold text-sm border-l border-gray-200">${pts}</td>
+        <td class="py-2.5 px-2 text-center font-mono font-bold text-sm border-l border-gray-200">${pts}</td>
         <td class="py-2 px-2 text-center text-sm">${c.p6 ?? 0}</td>
         <td class="py-2 px-2 text-center text-sm">${c.p4 ?? 0}</td>
         <td class="py-2 px-2 text-center text-sm">${c.p3 ?? 0}</td>
@@ -456,7 +456,7 @@ export function renderWelcome(players) {
               <th class="py-2.5 px-1 text-gray-400 w-8">#</th>
               <th class="py-2.5 px-1 w-8"></th>
               <th class="py-2.5 px-3 text-gray-300">Part.</th>
-              <th class="py-2.5 px-3 text-center text-white font-bold border-l border-gray-600">Pts</th>
+              <th class="py-2.5 px-2 text-center text-white font-bold border-l border-gray-600">Pts</th>
               <th class="py-2.5 px-2 text-center ${H.p6}">6P</th>
               <th class="py-2.5 px-2 text-center ${H.p4}">4P</th>
               <th class="py-2.5 px-2 text-center ${H.p3}">3P</th>
