@@ -131,6 +131,7 @@ function renderGroup(letter, groupResult, playerGroup) {
           </thead>
           <tbody>${posRows}</tbody>
         </table>
+        </div>
       </div>`;
 
   } else if (playerFinalStandings) {
@@ -448,7 +449,8 @@ export function renderWelcome(players) {
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <table class="w-full text-left">
+        <div class="overflow-x-auto">
+        <table class="w-full text-left min-w-[480px]">
           <thead>
             <tr class="bg-gray-800 text-xs uppercase tracking-wide">
               <th class="py-2.5 px-1 text-gray-400 w-8">#</th>
