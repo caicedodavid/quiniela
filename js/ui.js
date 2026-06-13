@@ -131,7 +131,6 @@ function renderGroup(letter, groupResult, playerGroup) {
           </thead>
           <tbody>${posRows}</tbody>
         </table>
-        </div>
       </div>`;
 
   } else if (playerFinalStandings) {
@@ -402,11 +401,11 @@ export function renderWelcome(players) {
                   onclick="window._selectPlayer(this.dataset.file)">${p.displayName}</button>
         </td>
         <td class="py-2.5 px-3 text-center font-mono font-bold text-sm border-l border-gray-200">${pts}</td>
-        <td class="py-2 px-2 text-center text-sm">${c.p6 ?? 0}</td>
-        <td class="py-2 px-2 text-center text-sm">${c.p4 ?? 0}</td>
-        <td class="py-2 px-2 text-center text-sm">${c.p3 ?? 0}</td>
-        <td class="py-2 px-2 text-center text-sm">${c.p1 ?? 0}</td>
-        <td class="py-2 px-2 text-center text-sm">${c.p0 ?? 0}</td>
+        <td class="py-2 px-2 text-center text-sm hidden md:table-cell">${c.p6 ?? 0}</td>
+        <td class="py-2 px-2 text-center text-sm hidden md:table-cell">${c.p4 ?? 0}</td>
+        <td class="py-2 px-2 text-center text-sm hidden md:table-cell">${c.p3 ?? 0}</td>
+        <td class="py-2 px-2 text-center text-sm hidden md:table-cell">${c.p1 ?? 0}</td>
+        <td class="py-2 px-2 text-center text-sm hidden md:table-cell">${c.p0 ?? 0}</td>
       </tr>`;
   }).join('');
 
@@ -449,19 +448,18 @@ export function renderWelcome(players) {
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
-        <table class="w-full text-left min-w-[480px]">
+        <table class="w-full text-left">
           <thead>
             <tr class="bg-gray-800 text-xs uppercase tracking-wide">
               <th class="py-2.5 px-1 text-gray-400 w-8">#</th>
               <th class="py-2.5 px-1 w-8"></th>
               <th class="py-2.5 px-3 text-gray-300">Part.</th>
               <th class="py-2.5 px-3 text-center text-white font-bold border-l border-gray-600">Pts</th>
-              <th class="py-2.5 px-2 text-center ${H.p6}">6P</th>
-              <th class="py-2.5 px-2 text-center ${H.p4}">4P</th>
-              <th class="py-2.5 px-2 text-center ${H.p3}">3P</th>
-              <th class="py-2.5 px-2 text-center ${H.p1}">1P</th>
-              <th class="py-2.5 px-2 text-center ${H.p0}">0P</th>
+              <th class="py-2.5 px-2 text-center hidden md:table-cell ${H.p6}">6P</th>
+              <th class="py-2.5 px-2 text-center hidden md:table-cell ${H.p4}">4P</th>
+              <th class="py-2.5 px-2 text-center hidden md:table-cell ${H.p3}">3P</th>
+              <th class="py-2.5 px-2 text-center hidden md:table-cell ${H.p1}">1P</th>
+              <th class="py-2.5 px-2 text-center hidden md:table-cell ${H.p0}">0P</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
