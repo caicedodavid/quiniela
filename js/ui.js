@@ -453,7 +453,7 @@ export function renderWelcome(players) {
         <table class="w-full text-left">
           <thead>
             <tr class="bg-gray-800 text-xs uppercase tracking-wide">
-              <th class="py-2.5 px-0 text-gray-400 w-6">#</th>
+              <th class="py-2.5 px-0 text-center text-gray-400 w-6">#</th>
               <th class="py-2.5 px-1 w-8"></th>
               <th class="py-2.5 px-3 text-gray-300">Part.</th>
               <th class="py-2.5 px-2 text-center text-white font-bold border-l border-gray-600">Pts</th>
