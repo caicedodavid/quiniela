@@ -9,11 +9,9 @@ on:
 
 jobs:
   prerender:
-    # Skip if David (the repo owner) pushed — his pre-commit hook already ran prerender.
-    # Skip if this action itself is committing back (avoid infinite loop).
-    if: |
-      github.actor != 'caicedodavid' &&
-      github.actor != 'github-actions[bot]'
+    # Skip if this action itself is committing back (infinite loop guard).
+    # David's local commits include [skip ci] via prepare-commit-msg hook.
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     permissions:

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Automatically append [skip ci] to commit messages when .xlsx files are staged.
+# This prevents the GitHub Action from re-running prerender when David commits
+# locally (the pre-commit hook already handled it).
+
+if git diff --cached --name-only | grep -q '\.xlsx$'; then
+  echo "" >> "$1"
+  echo "[skip ci]" >> "$1"
+fi
