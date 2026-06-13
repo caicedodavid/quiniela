@@ -1,0 +1,41 @@
+name: Prerender scores
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/master.xlsx'
+      - 'data/players/**.xlsx'
+
+jobs:
+  prerender:
+    # Skip if David (the repo owner) pushed — his pre-commit hook already ran prerender.
+    # Skip if this action itself is committing back (avoid infinite loop).
+    if: |
+      github.actor != 'caicedodavid' &&
+      github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # needed to push scores.json back
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so positionHistory reads correctly
+
+      - name: Install dependencies
+        run: pip install openpyxl
+
+      - name: Run prerender
+        run: python3 prerender.py
+
+      - name: Commit scores.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/scores.json
+          # Only commit if something actually changed
+          git diff --cached --quiet || git commit -m "chore(bot): update scores.json [skip ci]"
+          git push

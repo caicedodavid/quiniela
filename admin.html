@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Quiniela Mundial 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 space-y-6">
+
+    <!-- Header -->
+    <div class="text-center">
+      <span class="text-4xl">&#x26BD;</span>
+      <h1 class="text-xl font-extrabold text-gray-800 mt-1">Quiniela Admin</h1>
+      <p class="text-sm text-gray-400">Actualizar resultados — master.xlsx</p>
+    </div>
+
+    <!-- Token setup -->
+    <div id="token-section">
+      <label class="block text-sm font-semibold text-gray-600 mb-1">
+        GitHub Token
+        <span class="font-normal text-gray-400">(se guarda solo en este navegador)</span>
+      </label>
+      <div class="flex gap-2">
+        <input id="token-input" type="password" placeholder="ghp_xxxxxxxxxxxx"
+               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+        <button onclick="saveToken()"
+                class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+          Guardar
+        </button>
+      </div>
+      <p id="token-status" class="text-xs mt-1 text-gray-400"></p>
+    </div>
+
+    <hr class="border-gray-200" />
+
+    <!-- Download -->
+    <div>
+      <p class="text-sm font-semibold text-gray-600 mb-2">1. Descarga el archivo actual</p>
+      <button onclick="downloadMaster()"
+              class="w-full flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100
+                     border border-blue-200 text-blue-700 font-semibold text-sm
+                     py-3 rounded-xl transition-colors">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Descargar master.xlsx
+      </button>
+    </div>
+
+    <!-- Upload -->
+    <div>
+      <p class="text-sm font-semibold text-gray-600 mb-2">2. Sube el archivo actualizado</p>
+
+      <label id="drop-zone"
+             class="flex flex-col items-center justify-center w-full h-32
+                    border-2 border-dashed border-gray-300 rounded-xl cursor-pointer
+                    hover:border-green-400 hover:bg-green-50 transition-colors">
+        <svg class="w-8 h-8 texay-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-8m0 0l-3 3m3-3l3 3M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+        </svg>
+        <span id="drop-label" class="text-sm text-gray-500">Arrastra o toca para seleccionar</span>
+        <input id="file-input" type="file" accept=".xlsx" class="hidden"
+               onchange="handleFile(this.files[0])" />
+      </label>
+
+      <button id="upload-btn" onclick="uploadMaster()" disabled
+              class="mt-3 w-full py-3 rounded-xl text-sm font-semibold transition-colors
+                     bg-gray-200 text-gray-400 cursor-not-allowed">
+        Subir y publicar
+      </button>
+    </div>
+
+    <!-- Status -->
+    <div id="status-box" class="hidden text-sm rounded-xl px-4 py-3 font-medium"></div>
+
+  </div>
+
+<script>
+  const REPO    = 'caicedodavid/quiniela';
+  const PATH    = 'data/master.xlsx';
+  const BRANCH  = 'main';
+  const API     = `https://api.github.com/repos/${REPO}/contents/${PATH}`;
+
+  let selectedFile = null;
+
+  // ── Token ────────────────────────────────────────────────────────────────────
+
+  function saveToken() {
+    const val = document.getElementById('token-input').value.trim();
+    if (!val) return;
+    localStorage.setItem('qm_gh_token', val);
+    document.getElementById('token-input').value = '';
+    updateTokenStatus();
+  }
+
+  function getToken() {
+    return localStorage.getItem('qm_gh_token') || '';
+  }
+
+  function updateTokenStatus() {
+    const tok = getToken();
+    const el  = document.getElementById('token-status');
+    if (tok) {
+      el.textContent = `Token guardado (${tok.slice(0,8)}…)`;
+      el.className   = 'text-xs mt-1 text-green-600';
+    } else {
+      el.textContent = 'Sin token — pega uno arriba.';
+      el.className   = 'text-xs mt-1 text-red-400';
+    }
+  }
+
+  // ── Download ─────────────────────────────────────────────────────────────────
+
+  async function downloadMaster() {
+    setStatus('Descargando…', 'info');
+    try {
+      const res  = await ghGet();
+      const blob = b64ToBlob(res.content.replace(/\n/g, ''),
+                             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'master.xlsx';
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus('Descargado. Edita el archivo y luego s\u00fabelo.', 'ok');
+    } catch (e) {
+      setStatus(`Error al descargar: ${e.message}`, 'err');
+    }
+  }
+
+  // ── File pick ────────────────────────────────────────────────────────────────
+
+  function handleFile(file) {
+    if (!file) return;
+    selectedFile = file;
+    document.getElementById('drop-label').textContent = file.name;
+    const btn = document.getElementById('upload-btn');
+    btn.disabled  = false;
+    btn.className = 'mt-3 w-full py-3 rounded-xl text-sm font-semibold transition-colors ' +
+                    'bg-green-600 hover:bg-green-700 text-white cursor-pointer';
+  }
+
+  // Drag-and-drop
+  const zone = document.getElementById('drop-zone');
+  zone.addEventListener('click',  () => document.getElementById('file-input').click());
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('border-green-400','bg-green-50'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('border-green-400','bg-green-50'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('border-green-400','bg-green-50');
+    handleFile(e.dataTransfer.files[0]);
+  });
+
+  // ── Upload ───────────────────────────────────────────────────────────────────
+
+  async function uploadMaster() {
+    if (!selectedFile) return;
+    if (!getToken()) { setStatus('Primero guarda tu token de GitHub.', 'err'); return; }
+
+    setStatus('Subiendo…', 'info');
+    document.getElementById('upload-btn').disabled = true;
+
+    try {
+      // Get current file SHA (required by GitHub API for updates)
+      const current = await ghGet();
+      const sha     = current.sha;
+
+      // Read selected file as base64
+      const b64 = await fileToBase64(selectedFile);
+
+      // Commit via GitHub API
+      const now = new Date().toLocaleString('es-VE', { timeZone: 'America/Caracas' });
+      await ghPut(b64, sha, `results: actualizar master.xlsx (${now})`);
+
+      setStatus('\u2705 Subido. El sitio se actualizar\u00e1 en ~2 minutos.', 'ok');
+      selectedFile = null;
+      document.getElementById('drop-label').textContent = 'Arrastra o toca para seleccionar';
+      const btn = document.getElementById('upload-btn');
+      btn.disabled  = true;
+      btn.className = 'mt-3 w-full py-3 rounded-xl text-sm font-semibold transition-colors ' +
+                      'bg-gray-200 text-gray-400 cursor-not-allowed';
+    } catch (e) {
+      setStatus(`Error al subir: ${e.message}`, 'err');
+      document.getElementById('upload-btn').disabled = false;
+    }
+  }
+
+  // ── GitHub API helpers ───────────────────────────────────────────────────────
+
+  async function ghGet() {
+    const res = await fetch(`${API}?ref=${BRANCH}`, {
+      headers: { Authorization: `Bearer ${getToken()}`, Accept: 'application/vnd.github+json' },
+    });
+    if (!res.ok) throw new Error(`GitHub API ${res.status}: ${await res.text()}`);
+    return res.json();
+  }
+
+  async function ghPut(contentB64, sha, message) {
+    const res = await fetch(API, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message, content: contentB64, sha, branch: BRANCH }),
+    });
+    if (!res.ok) throw new Error(`GitHub API ${res.status}: ${await res.text()}`);
+    return res.json();
+  }
+
+  // ── Utils ────────────────────────────────────────────────────────────────────
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function b64ToBlob(b64, mime) {
+    const bin  = atob(b64);
+    const buf  = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    return new Blob([buf], { type: mime });
+  }
+
+  function setStatus(msg, type) {
+    const el = document.getElementById('status-box');
+    el.textContent = msg;
+    el.className   = 'text-sm rounded-xl px-4 py-3 font-medium ' + {
+      ok:   'bg-green-50 text-green-700 border border-green-200',
+      err:  'bg-red-50   text-red-700   border border-red-200',
+      info: 'bg-blue-50  text-blue-700  border border-blue-200',
+    }[type];
+    el.classList.remove('hidden');
+  }
+
+  // Init
+  updateTokenStatus();
+</script>
+</body>
+</html>
