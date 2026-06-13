@@ -393,7 +393,7 @@ export function renderWelcome(players) {
 
     return `
       <tr class="${rowCls} border-b border-gray-100 hover:brightness-95 transition-all">
-        <td class="py-2.5 px-2 text-center w-8">${rank}</td>
+        <td class="py-2.5 px-1 text-center w-8">${rank}</td>
         <td class="py-2.5 px-1 text-center w-8">${mov}</td>
         <td class="py-2.5 px-3 text-sm">
           <button class="player-link text-left hover:text-green-700 hover:underline transition-colors font-medium"
@@ -451,7 +451,7 @@ export function renderWelcome(players) {
         <table class="w-full text-left">
           <thead>
             <tr class="bg-gray-800 text-xs uppercase tracking-wide">
-              <th class="py-2.5 px-2 text-gray-400 w-8">#</th>
+              <th class="py-2.5 px-1 text-gray-400 w-8">#</th>
               <th class="py-2.5 px-1 w-8"></th>
               <th class="py-2.5 px-3 text-gray-300">Part.</th>
               <th class="py-2.5 px-3 text-center text-white font-bold border-l border-gray-600">Pts</th>
