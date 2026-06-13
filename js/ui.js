@@ -241,43 +241,59 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
 
   document.getElementById('main-content').innerHTML = `
     <!-- Encabezado del jugador -->
-    <div class="mb-4 md:mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-4 md:p-6 text-white shadow-lg">
+    <div class="mb-4 md:mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-5 md:p-7 text-white shadow-lg">
 
-      <!-- Top row: photo · name+description · points -->
-      <div class="flex items-start gap-4">
+      <!-- Top row: photo · name · points -->
+      <div class="flex items-start gap-4 ${description ? 'mb-4' : ''}">
 
         <!-- Photo / initials avatar -->
-        <div class="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-green-700 flex items-center justify-center">
+        <div class="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden flex-shrink-0 bg-green-700 flex items-center justify-center">
           ${photoUrl
             ? `<img src="${photoUrl}" alt="${playerName}"
                    class="w-full h-full object-cover"
                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
-               <div class="w-full h-full hidden items-center justify-center text-xl font-black text-green-400">
+               <div class="w-full h-full hidden items-center justify-center text-2xl font-black text-green-400">
                  ${playerName.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase()}
                </div>`
-            : `<div class="w-full h-full flex items-center justify-center text-xl font-black text-green-400">
+            : `<div class="w-full h-full flex items-center justify-center text-2xl font-black text-green-400">
                  ${playerName.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase()}
                </div>`
           }
         </div>
 
-        <!-- Name + description -->
-        <div class="flex-1 min-w-0">
-          <h1 class="text-sm md:text-base font-extrabold leading-tight mb-1.5">${playerName}</h1>
-          ${description ? `
-            <div class="max-h-16 overflow-y-auto pr-1"
-                 style="scrollbar-width: thin; scrollbar-color: #16a34a transparent;">
-              <p class="text-green-200 text-xs leading-relaxed whitespace-pre-line">${description}</p>
-            </div>` : ''}
+        <!-- Name -->
+        <div class="flex-1 min-w-0 pt-1">
+          <h1 class="text-xl md:text-2xl font-extrabold leading-tight">${playerName}</h1>
         </div>
 
         <!-- Total points -->
-        <div class="text-right flex-shrink-0 pl-2">
+        <div class="text-right flex-shrink-0">
           <span class="text-5xl md:text-6xl font-black leading-none">${totalPoints}</span>
-          <p class="text-green-300 text-lg md:text-xl mt-0.5">pts</p>
+          <p class="text-green-300 text-lg mt-0.5">pts</p>
         </div>
 
       </div>
+
+      <!-- Description below full row, with expand toggle -->
+      ${description ? `
+        <div>
+          <p id="desc-text"
+             class="text-green-200 text-xs leading-relaxed whitespace-pre-line line-clamp-3"
+             style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;">
+            ${description}
+          </p>
+          <button id="desc-toggle"
+                  onclick="
+                    const t = document.getElementById('desc-text');
+                    const expanded = t.style.webkitLineClamp === 'unset';
+                    t.style.webkitLineClamp = expanded ? '3' : 'unset';
+                    t.style.overflow = expanded ? 'hidden' : 'visible';
+                    this.textContent = expanded ? 'Ver m\u00e1s' : 'Ver menos';
+                  "
+                  class="mt-1.5 text-green-400 hover:text-green-200 text-xs font-semibold transition-colors">
+            Ver más
+          </button>
+        </div>` : ''}
 
     </div>
 
@@ -382,7 +398,9 @@ export function renderWelcome(players) {
         <td class="py-2.5 px-2 text-center w-10">${rank}</td>
         <td class="py-2.5 px-1 text-center w-8">${mov}</td>
         <td class="py-2.5 px-3 text-sm">
-          ${`<button class="player-link text-left hover:text-green-700 hover:underline transition-colors" data-file="${p.file}">${p.displayName}</button>`}
+          <button class="player-link text-left hover:text-green-700 hover:underline transition-colors font-medium"
+                  data-file="${p.file}"
+                  onclick="window._selectPlayer(this.dataset.file)">${p.displayName}</button>
         </td>
         <td class="py-2.5 px-3 text-center font-mono font-bold text-sm border-l border-gray-200">${pts}</td>
         <td class="py-2 px-2 text-center text-sm">${c.p6 ?? 0}</td>

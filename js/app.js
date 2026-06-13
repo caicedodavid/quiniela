@@ -24,6 +24,9 @@ let descriptions = {};
 let photos       = {};
 let activeFile   = null;
 
+// Expose selectPlayer for inline onclick in leaderboard name links
+window._selectPlayer = (file) => selectPlayer(file);
+
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function init() {
   let scores;
@@ -56,32 +59,16 @@ async function init() {
   renderSidebar(players, null);
   renderWelcome(players);
 
-  // Wire up desktop sidebar buttons
+  // Desktop sidebar clicks
   document.getElementById('player-list').addEventListener('click', e => {
     const btn = e.target.closest('.player-btn');
     if (btn) selectPlayer(btn.dataset.file);
   });
 
-  // Player name links in the leaderboard table (delegated, permanent)
-  document.getElementById('main-content').addEventListener('click', e => {
-    const link = e.target.closest('.player-link');
-    if (link) selectPlayer(link.dataset.file);
-  });
-
-  // Wire up mobile player select
+  // Mobile select
   document.getElementById('mobile-player-select').addEventListener('change', e => {
     if (e.target.value) selectPlayer(e.target.value);
   });
-
-  // Logo buttons → go home
-  const goHome = () => {
-    activeFile = null;
-    renderSidebar(players, null);
-    renderWelcome(players);
-    document.getElementById('mobile-player-select').value = '';
-  };
-  document.getElementById('mobile-home-btn').addEventListener('click', goHome);
-  document.getElementById('desktop-home-btn').addEventListener('click', goHome);
 }
 // Excel does an atomic rename on save; the file can vanish for ~500 ms.
 async function fetchWithRetry(url, retries = 3, delayMs = 800) {
@@ -169,8 +156,8 @@ function buildEmptyMaster(playerData) {
 
 init();
 
-// ── Home button — wired outside init() so it always attaches ─────────────────
-// (init is async; if it throws before the listeners, clicks would be dead)
+// ── Permanent top-level listeners (survive every renderWelcome / renderPlayerView) ──
+
 function goHome() {
   activeFile = null;
   renderSidebar(players, null);
