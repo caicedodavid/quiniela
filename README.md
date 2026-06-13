@@ -121,10 +121,11 @@ git add js/ui.js && git commit --no-verify -m "ui: ..." && git push
 > Never run prerender manually just before a normal commit — it will cause
 > double-tracking of positions.
 
-### Re-installing the hook after a fresh clone
+### Re-installing the hooks after a fresh clone
 
 ```bash
 cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+cp hooks/prepare-commit-msg .git/hooks/prepare-commit-msg && chmod +x .git/hooks/prepare-commit-msg
 ```
 
 ---
