@@ -40,7 +40,14 @@ worldcup-fantasy/
 
 ---
 
-## Local development
+## Workflow rules
+
+- **UI/interface changes**: commit locally with `--no-verify`, open the browser, wait for David to validate, then `git push`. Never push UI changes speculatively.
+- **Result commits**: `git add data/master.xlsx && git commit -m "results: ..."` — hook runs prerender automatically, no manual push gate needed.
+- **Content-only changes** (descriptions, photos, nicknames): `--no-verify`, validate locally, then push.
+
+---
+
 
 ```bash
 cd /Users/d0c0b74/worldcup-fantasy
