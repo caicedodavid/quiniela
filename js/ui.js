@@ -364,7 +364,7 @@ export function renderWelcome(players) {
       badge = `<span class="inline-flex w-5 h-5 rounded-full bg-teal-500 text-white text-[10px] font-black items-center justify-center">${idx + 1}</span>`;
     } else if (bot3) {
       if (fromBot === 0) {
-        badge = `<span class="text-gray-600 text-[11px] font-semibold">${idx + 1}</span><span class="text-sm ml-0.5">\uD83D\uDCA9</span>`;
+        badge = `<span class="inline-flex flex-col items-center leading-none"><span class="text-gray-600 text-[10px] font-semibold">${idx + 1}</span><span class="text-[10px]">\uD83D\uDCA9</span></span>`;
       } else {
         badge = `<span class="inline-flex w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black items-center justify-center">${idx + 1}</span>`;
       }
