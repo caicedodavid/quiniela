@@ -44,18 +44,51 @@ worldcup-fantasy/
 
 ```bash
 cd /Users/d0c0b74/worldcup-fantasy
-bash serve.sh          # scores players, starts server on :7026, auto-restarts
+python3 -m http.server 7026
 # -> http://localhost:7026
 ```
 
-**Warning:** `serve.sh` watches `master.xlsx` and auto-runs `prerender.py` when it
-changes. If you then run `python3 prerender.py` manually again, positions will
-double-track. Always restore the committed baseline first if this happens:
+To preview a score update before committing:
 
 ```bash
-git checkout data/scores.json   # restore committed baseline
-python3 prerender.py            # run exactly once
+python3 prerender.py && open http://localhost:7026
 ```
+
+`serve.sh` has been deleted — the pre-commit hook replaced its main job.
+
+---
+
+## How the pre-commit hook works (and why it doesn't loop)
+
+The hook lives at `hooks/pre-commit` (copy to `.git/hooks/pre-commit` after a fresh clone).
+
+**What happens on `git commit`:**
+
+```
+git commit -m "results: ..."
+    │
+    ├─ Git invokes .git/hooks/pre-commit (ONCE, before writing the commit)
+    │       │
+    │       ├─ Checks: are any .xlsx files staged?
+    │       │     No  → exits immediately, commit proceeds unchanged
+    │       │     Yes → runs python3 prerender.py
+    │       │               └─ writes updated scores.json to disk
+    │       └─ runs git add data/scores.json  ← stages it into the same commit
+    │
+    └─ Git finalises the commit with everything staged (including scores.json)
+       DONE — the hook does not call git commit, so there is no second trigger
+```
+
+**Why no infinite loop:** A pre-commit hook runs *before* the commit is written.
+It can modify and stage files, then hands control back to git which writes
+exactly one commit. `git add` inside a hook does not trigger another hook.
+The hook never calls `git commit`, so there is nothing to loop.
+
+**Why idempotent runs don't corrupt history:** `prerender.py` compares the newly
+computed positions against the last entry in each player's `positionHistory`.
+If nothing changed (e.g. the hook ran, then `serve.sh`'s watcher also ran, then
+the hook ran again), the array simply isn't appended to. Run it 100 times with
+the same `master.xlsx` — `positionHistory` grows by exactly one entry.
 
 ---
 
