@@ -244,7 +244,7 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
     <div class="mb-4 md:mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-5 md:p-7 text-white shadow-lg">
 
       <!-- Top row: photo · name · points -->
-      <div class="flex items-start gap-4 ${description ? 'mb-4' : ''}">
+      <div class="flex items-start gap-4">
 
         <!-- Photo / initials avatar -->
         <div class="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden flex-shrink-0 bg-green-700 flex items-center justify-center">
@@ -262,7 +262,7 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
         </div>
 
         <!-- Name -->
-        <div class="flex-1 min-w-0 pt-1">
+        <div class="flex-1 min-w-0">
           <h1 class="text-xl md:text-2xl font-extrabold leading-tight">${playerName}</h1>
         </div>
 
@@ -276,12 +276,10 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
 
       <!-- Description below full row, with expand toggle -->
       ${description ? `
-        <div>
+        <div class="mt-2">
           <p id="desc-text"
-             class="text-green-200 text-xs leading-relaxed whitespace-pre-line line-clamp-3"
-             style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;">
-            ${description}
-          </p>
+             class="text-green-200 text-xs leading-relaxed whitespace-pre-line"
+             style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;">${description.trim()}</p>
           <button id="desc-toggle"
                   onclick="
                     const t = document.getElementById('desc-text');
@@ -290,7 +288,7 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
                     t.style.overflow = expanded ? 'hidden' : 'visible';
                     this.textContent = expanded ? 'Ver m\u00e1s' : 'Ver menos';
                   "
-                  class="mt-1.5 text-green-400 hover:text-green-200 text-xs font-semibold transition-colors">
+                  class="mt-1.5 text-yellow-300 hover:text-yellow-100 underline text-xs font-semibold transition-colors">
             Ver más
           </button>
         </div>` : ''}
@@ -413,9 +411,17 @@ export function renderWelcome(players) {
 
   // Copy-to-clipboard text: enumerated list with pts to the left
   const stripQuotes = name => name.replace(/"[^"]*"/g, '').replace(/\s+/g, ' ').trim();
-  const copyText = players
-    .map((p, i) => `${i + 1}. ${p.totalPoints ?? 0}pts \u2014 ${stripQuotes(p.displayName)}`)
-    .join('\n');
+  const lastIdx2 = players.length - 1;
+  const copyText = players.map((p, i) => {
+    const fromBot = lastIdx2 - i;
+    let prefix = '';
+    if      (i === 0)       prefix = '\uD83C\uDFC6 '; //  + space
+    else if (i <= 2)        prefix = '\uD83D\uDFE2';  // 
+    else if (i <= 4)        prefix = '\uD83D\uDFE1';  // 
+    else if (fromBot === 0) prefix = '\uD83D\uDCA9';  // 
+    else if (fromBot <= 2)  prefix = '\uD83D\uDD34';  // 
+    return `${prefix}${i + 1}. ${p.totalPoints ?? 0}pts \u2014 ${stripQuotes(p.displayName)}`;
+  }).join('\n');
 
   document.getElementById('main-content').innerHTML = `
     <!-- Hero banner -->
