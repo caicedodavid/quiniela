@@ -106,18 +106,20 @@ function buildHtml(scores, idx) {
   const { fixtures, fixtureGrid: gridNames } = scores;
   const fix    = fixtures[idx];
   const nowSec = Date.now() / 1000;
-  const isPlayed   = fix.homeGoals !== null;
-  const isLive     = !isPlayed && fix.ts <= nowSec && fix.ts >= nowSec - TWO_HOURS;
+  const hasResult = fix.homeGoals !== null;
+  const isOver     = fix.ts < nowSec - TWO_HOURS;
+  const isPlayed   = hasResult || isOver;
+  const isLive     = !isPlayed && fix.ts <= nowSec;
   const isUpcoming = fix.ts > nowSec;
 
   const badge =
     isPlayed   ? `<span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-semibold">Jugado</span>` :
     isLive     ? `<span class="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-semibold animate-pulse">En juego</span>` :
-    isUpcoming ? `<span class="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-semibold">Próximo</span>` : '';
+    isUpcoming ? `<span class="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-semibold">Pr\u00f3ximo</span>` : '';
 
-  const scoreStr = isPlayed
-    ? `<span class="font-black text-gray-800">${fix.homeGoals} – ${fix.awayGoals}</span>`
-    : `<span class="text-gray-400 text-xs">${formatKickoff(fix.ts)}</span>`;
+  const scoreStr = hasResult
+    ? `<span class="font-black text-gray-800">${fix.homeGoals} \u2013 ${fix.awayGoals}</span>`
+    : `<span class="text-gray-400 text-xs">${isUpcoming || isLive ? formatKickoff(fix.ts) : '\u2014'}</span>`;
 
   const nav = (dir, label) => {
     const target = idx + dir;
