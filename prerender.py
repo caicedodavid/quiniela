@@ -5,7 +5,8 @@ writes data/scores.json sorted by total points descending.
 
 Replaces update_manifest.py (also regenerates the player list).
 """
-import json, pathlib, sys
+import json, pathlib, re, sys
+from datetime import timezone, timedelta
 
 try:
     import openpyxl
@@ -23,11 +24,14 @@ BONUS_PER_POS    = 1   # must match js/scorer.js
 
 # openpyxl uses 1-based column numbers
 COL_A  = 1
+COL_X  = 24  # match datetime (naive, treated as UTC-4 = ET/VET)
 COL_AA = 27   # home team name
 COL_AC = 29   # home goals
 COL_AD = 30   # away goals
 COL_AF = 32   # away team name
 COL_BD = 56   # standings team name
+
+TZ_VET = timezone(timedelta(hours=-4))  # Venezuela/Eastern — same offset
 
 
 PLACEHOLDER_NAMES = {"nombre", "name", "player", "jugador"}
@@ -47,8 +51,83 @@ def parse_player_name(wb, fallback):
             return str(v).strip()
     return fallback
 
+def _dt_to_ts(dt):
+    """Convert a naive datetime (treated as VET/ET UTC-4) to a Unix timestamp."""
+    if dt is None:
+        return None
+    return int(dt.replace(tzinfo=TZ_VET).timestamp())
+
+
+def extract_fixtures_from_master(wb):
+    """Extract all 72 match records from the master workbook.
+
+    Returns a flat list of dicts (one per match, in sheet order):
+      { ts, home, away, homeGoals, awayGoals }
+    """
+    ws = wb["WORLDCUP"]
+    records = []
+    for i in range(len(GROUPS)):
+        for j in range(6):
+            r  = (4 + 8 * i) + j
+            dt = ws.cell(r, COL_X).value
+            records.append({
+                "ts":        _dt_to_ts(dt),
+                "home":      str(_cell(ws, r, COL_AA) or "?"),
+                "away":      str(_cell(ws, r, COL_AF) or "?"),
+                "homeGoals": int(v) if (v := _cell(ws, r, COL_AC)) is not None else None,
+                "awayGoals": int(v) if (v := _cell(ws, r, COL_AD)) is not None else None,
+            })
+    return records
+
+
+def extract_predictions_flat(wb):
+    """Extract predicted goals for all 72 matches from a player workbook.
+
+    Returns a flat list of [homeGoals, awayGoals] pairs (None if not predicted).
+    """
+    ws = wb["WORLDCUP"]
+    out = []
+    for i in range(len(GROUPS)):
+        for j in range(6):
+            r  = (4 + 8 * i) + j
+            hg = _cell(ws, r, COL_AC)
+            ag = _cell(ws, r, COL_AD)
+            out.append([
+                int(hg) if hg is not None else None,
+                int(ag) if ag is not None else None,
+            ])
+    return out
+
+
+# Grid display name overrides — when the first name of the displayName
+# doesn't match the real name (e.g. nickname IS the name, not in quotes).
+_GRID_OVERRIDES = {
+    'Serginho el m\u00edtico': 'Sergio',
+    'Emmanuel Lambaz':      'Emma',
+}
+
+
+def grid_short_name(display_name, all_display_names):
+    """Return the shortest unambiguous first name for the fixture grid."""
+    if display_name in _GRID_OVERRIDES:
+        return _GRID_OVERRIDES[display_name]
+    clean = re.sub(r'"[^"]*"', '', display_name).strip()
+    parts = clean.split()
+    first = parts[0] if parts else display_name
+
+    # Check for collisions with any other display name's first word
+    others = [
+        re.sub(r'"[^"]*"', '', n).strip().split()[0]
+        for n in all_display_names
+        if n != display_name
+    ]
+    if first in others and len(parts) >= 2:
+        return f"{first} {parts[-1][0]}."
+    return first
+
+
 def parse_groups(path):
-    """Return (player_name, groups) from a player Excel file."""
+    """Return (player_name, groups, wb) from a player Excel file."""
     wb = openpyxl.load_workbook(path, data_only=True)
     if "WORLDCUP" not in wb.sheetnames:
         raise ValueError(f"No WORLDCUP sheet in {path.name}")
@@ -80,7 +159,7 @@ def parse_groups(path):
         groups.append({"letter": letter, "teams": teams, "matches": matches})
 
     player_name = parse_player_name(wb, display_name(path.name))
-    return player_name, groups
+    return player_name, groups, wb
 
 
 # ── Scoring (mirrors js/scorer.js) ───────────────────────────────────────────
@@ -158,15 +237,18 @@ def load_nicknames():
 def main():
     nicknames = load_nicknames()
     # Load master results (optional — no master = all pending)
-    master_groups = None
+    master_groups    = None
+    master_fixtures  = []   # flat list of 72 fixture records
     if MASTER.exists():
         try:
-            _, master_groups = parse_groups(MASTER)
+            master_wb = openpyxl.load_workbook(MASTER, data_only=True)
+            _, master_groups, _ = parse_groups(MASTER)
+            master_fixtures = extract_fixtures_from_master(master_wb)
             print(f"master.xlsx cargado")
         except Exception as e:
-            print(f"⚠️  master.xlsx no se pudo leer: {e}")
+            print(f"\u26a0\ufe0f  master.xlsx no se pudo leer: {e}")
     else:
-        print("⚠️  master.xlsx no encontrado — puntos quedarán pendientes")
+        print("\u26a0\ufe0f  master.xlsx no encontrado \u2014 puntos quedar\u00e1n pendientes")
 
     # Score every player file
     xlsx_files = sorted(
@@ -175,11 +257,13 @@ def main():
     )
 
     players = []
+    player_preds = {}  # file -> flat predictions list (72 entries)
     for path in xlsx_files:
         fallback = display_name(path.name)
         try:
-            excel_name, pg = parse_groups(path)
+            excel_name, pg, wb = parse_groups(path)
             name = nicknames.get(path.name, excel_name)
+            player_preds[path.name] = extract_predictions_flat(wb)
             if master_groups:
                 pts, counts = score_player(pg, master_groups)
                 print(f"  {name}: {pts} pts")
@@ -188,8 +272,9 @@ def main():
                 print(f"  {name}: pendiente")
         except Exception as e:
             name = nicknames.get(path.name, fallback)
-            print(f"    {name}: error — {e}")
+            print(f"    {name}: error \u2014 {e}")
             pts, counts = None, None
+            player_preds[path.name] = [[None, None]] * 72
         players.append({"file": path.name, "displayName": name,
                         "totalPoints": pts, "counts": counts})
 
@@ -253,8 +338,40 @@ def main():
         p["positionHistory"] = hist
         p["prevPosition"]    = hist[-2] if len(hist) >= 2 else None
 
+    # Build fixture grid — sorted alphabetically by first name for consistent columns
+    all_names = [p["displayName"] for p in players]
+    grid_players = sorted(
+        players,
+        key=lambda p: grid_short_name(p["displayName"], all_names).lower()
+    )
+    fixture_grid = [grid_short_name(p["displayName"], all_names) for p in grid_players]
+
+    # Attach predictions to each fixture (one entry per grid player, in grid order)
+    fixtures = []
+    for idx, fix in enumerate(master_fixtures):
+        preds = []
+        for p in grid_players:
+            pair = player_preds.get(p["file"], [[None, None]] * 72)
+            entry = pair[idx] if idx < len(pair) else [None, None]
+            preds.append(entry)
+        fixtures.append({
+            "ts":        fix["ts"],
+            "home":      fix["home"],
+            "away":      fix["away"],
+            "homeGoals": fix["homeGoals"],
+            "awayGoals": fix["awayGoals"],
+            "preds":     preds,
+        })
+    # Sort by kickoff time
+    fixtures.sort(key=lambda f: f["ts"] or 0)
+
     OUT.write_text(json.dumps(
-        {"matchesPlayed": matches_played, "players": players},
+        {
+            "matchesPlayed": matches_played,
+            "fixtureGrid":   fixture_grid,
+            "fixtures":      fixtures,
+            "players":       players,
+        },
         ensure_ascii=False, indent=2,
     ))
     print(f"scores.json written -- {len(players)} participant(s)")

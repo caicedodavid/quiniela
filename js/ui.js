@@ -7,7 +7,7 @@
 import { scoreGroup, BONUS_PER_POSITION } from './scorer.js';
 
 // ── Country code map (FIFA 3-letter codes) ────────────────────────────────────
-const TEAM_CODE = {
+export const TEAM_CODE = {
   'Alemania': 'GER', 'Arabia Saudita': 'KSA', 'Argelia': 'ALG',
   'Argentina': 'ARG', 'Australia': 'AUS', 'Austria': 'AUT',
   'Bosnia y Herzegovina': 'BIH', 'Brasil': 'BRA', 'B\u00e9lgica': 'BEL',
@@ -433,6 +433,7 @@ export function renderWelcome(players) {
     </div>
 
     <div class="max-w-2xl mx-auto">
+      <div id="fixture-widget" class="mb-4 md:mb-6"></div>
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Clasificación general</h2>
         <button id="copy-standings-btn"

@@ -6,6 +6,7 @@
 import { parseWorkbook, computeStandings } from './parser.js';
 import { scoreGroup, BONUS_PER_POSITION } from './scorer.js';
 import { renderPlayerView, renderSidebar, renderLoading, renderError, renderWelcome } from './ui.js';
+import { renderFixtureWidget } from './fixtures.js';
 
 // Expose computeStandings for scorer.js (avoids circular import via window bridge)
 window._parserModule = { computeStandings };
@@ -22,6 +23,7 @@ const PHOTOS_PATH       = 'data/photos.json';
 let players      = [];
 let descriptions = {};
 let photos       = {};
+let scores       = null;
 let activeFile   = null;
 
 // Expose selectPlayer for inline onclick in leaderboard name links
@@ -29,7 +31,6 @@ window._selectPlayer = (file) => selectPlayer(file);
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function init() {
-  let scores;
   try {
     const [scoresRes, descRes, photosRes] = await Promise.all([
       fetch(`${SCORES_PATH}?t=${Date.now()}`),
@@ -59,7 +60,7 @@ async function init() {
   window._matchesPlayed = scores.matchesPlayed ?? 0;
 
   renderSidebar(players, null);
-  renderWelcome(players);
+  showWelcome();
 
   // Desktop sidebar clicks
   document.getElementById('player-list').addEventListener('click', e => {
@@ -160,10 +161,15 @@ init();
 
 // ── Permanent top-level listeners (survive every renderWelcome / renderPlayerView) ──
 
+function showWelcome() {
+  renderWelcome(players);
+  renderFixtureWidget(document.getElementById('fixture-widget'), scores);
+}
+
 function goHome() {
   activeFile = null;
   renderSidebar(players, null);
-  renderWelcome(players);
+  showWelcome();
   const sel = document.getElementById('mobile-player-select');
   if (sel) sel.value = '';
 }
