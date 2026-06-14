@@ -207,13 +207,23 @@ def main():
         )
     players.sort(key=sort_key)
 
-    # Position history: append new position only if something actually changed.
-    # This naturally handles double-runs (serve.sh, manual runs) — if no result
-    # changed, positions won't change, so nothing gets appended.
-    history_map = {}  # file -> list of past positions (oldest first)
+    # Count matches played from master (both goals must be set)
+    matches_played = 0
+    if master_groups:
+        for g in master_groups:
+            for m in g["matches"]:
+                if m.get("homeGoals") is not None and m.get("awayGoals") is not None:
+                    matches_played += 1
+    print(f"Matches played: {matches_played} / 72")
+
+    # Position history: append only when new matches have been played since last run.
+    # This reliably prevents double-runs (manual, CI, serve loop) from bloating history.
+    history_map  = {}   # file -> list of past positions
+    prev_matches = None # matchesPlayed stored from last run
     if OUT.exists():
         try:
             old = json.loads(OUT.read_text(encoding="utf-8"))
+            prev_matches = old.get("matchesPlayed")
             for p in old.get("players", []):
                 hist = p.get("positionHistory")
                 # back-compat: migrate legacy prevPosition into a 2-entry list
@@ -229,22 +239,24 @@ def main():
     for rank, p in enumerate(players, start=1):
         p["position"] = rank
 
-    # Only append to history if at least one player changed position
-    any_changed = any(
-        p["position"] != (history_map.get(p["file"]) or [None])[-1]
-        for p in players
-    )
-    any_scored = any(p.get("totalPoints") for p in players)
+    # Only append to history if more matches have been played than last time.
+    # If prev_matches is None the file predates this field — just bootstrap it,
+    # do NOT treat it as a trigger to append.
+    new_results = (prev_matches is not None
+                   and matches_played > 0
+                   and matches_played != prev_matches)
 
     for p in players:
         hist = list(history_map.get(p["file"]) or [])
-        if any_changed and any_scored:
+        if new_results:
             hist.append(p["position"])
         p["positionHistory"] = hist
-        # Convenience fields for the UI (last two entries)
-        p["prevPosition"] = hist[-2] if len(hist) >= 2 else None
+        p["prevPosition"]    = hist[-2] if len(hist) >= 2 else None
 
-    OUT.write_text(json.dumps({"players": players}, ensure_ascii=False, indent=2))
+    OUT.write_text(json.dumps(
+        {"matchesPlayed": matches_played, "players": players},
+        ensure_ascii=False, indent=2,
+    ))
     print(f"scores.json written -- {len(players)} participant(s)")
     if not players:
         sys.exit("ERROR: no player files found -- aborting build")

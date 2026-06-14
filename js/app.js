@@ -55,6 +55,8 @@ async function init() {
     position:        p.position        ?? null,
     positionHistory: p.positionHistory ?? [],
   }));
+  // expose for debugging / future widgets
+  window._matchesPlayed = scores.matchesPlayed ?? 0;
 
   renderSidebar(players, null);
   renderWelcome(players);
