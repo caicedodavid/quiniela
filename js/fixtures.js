@@ -9,7 +9,7 @@
  *   This covers: match started up to 2 hours ago (in play) or upcoming.
  */
 
-import { TEAM_CODE } from './ui.js';
+import { TEAM_CODE, BADGE } from './ui.js';
 
 const TWO_HOURS = 2 * 60 * 60; // seconds
 
@@ -34,17 +34,25 @@ function formatKickoff(ts) {
   });
 }
 
+function scoreMatch(ph, pa, rh, ra) {
+  const outcome = (h, a) => h > a ? 1 : h < a ? -1 : 0;
+  const exactH  = ph === rh, exactA = pa === ra;
+  const correct = outcome(ph, pa) === outcome(rh, ra);
+  if (exactH && exactA)              return 6;
+  if (correct && (exactH || exactA)) return 4;
+  if (correct)                       return 3;
+  if (exactH || exactA)              return 1;
+  return 0;
+}
+
 function predCell(pred, actual) {
   const [ph, pa] = pred ?? [null, null];
   if (ph === null || pa === null) return `<span class="text-gray-300">—</span>`;
-  if (actual.homeGoals === null) return `<span class="text-gray-700">${ph}-${pa}</span>`;
+  if (actual.homeGoals === null)  return `<span class="text-gray-700 text-[10px]">${ph}-${pa}</span>`;
 
-  const [rh, ra] = [actual.homeGoals, actual.awayGoals];
-  const outcome  = (h, a) => h > a ? 1 : h < a ? -1 : 0;
-  const exact    = ph === rh && pa === ra;
-  const correct  = outcome(ph, pa) === outcome(rh, ra);
-  const cls = exact ? 'text-green-600 font-bold' : correct ? 'text-blue-600' : 'text-red-400';
-  return `<span class="${cls}">${ph}-${pa}</span>`;
+  const pts = scoreMatch(ph, pa, actual.homeGoals, actual.awayGoals);
+  const cls = (BADGE[pts] ?? BADGE[0]).replace('font-bold', '').replace('font-semibold', '');
+  return `<span class="inline-block px-1 py-px rounded text-[9px] font-bold ${cls}">${ph}-${pa}</span>`;
 }
 
 function renderGrid(gridNames, preds, actual) {

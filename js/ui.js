@@ -32,8 +32,8 @@ function teamName(name) {
   return `<span class="hidden md:inline">${name}</span><span class="md:hidden font-mono">${code}</span>`;
 }
 
-// ── Point badge styling ───────────────────────────────────────────────────────
-const BADGE = {
+// ── Point badge styling ─────────────────────────────────────────────
+export const BADGE = {
   6:    'bg-green-500  text-white font-bold',
   4:    'bg-yellow-400 text-yellow-900 font-bold',
   3:    'bg-yellow-400 text-yellow-900 font-bold',
