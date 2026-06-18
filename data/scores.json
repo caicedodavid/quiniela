@@ -1,5 +1,5 @@
 {
-  "matchesPlayed": 24,
+  "matchesPlayed": 26,
   "fixtureGrid": [
     "Alexis",
     "Alfredo",
@@ -1969,8 +1969,8 @@
       "ts": 1781798400,
       "home": "República Checa",
       "away": "Sudáfrica",
-      "homeGoals": null,
-      "awayGoals": null,
+      "homeGoals": 1,
+      "awayGoals": 1,
       "preds": [
         [
           2,
@@ -2050,8 +2050,8 @@
       "ts": 1781809200,
       "home": "Suiza",
       "away": "Bosnia y Herzegovina",
-      "homeGoals": null,
-      "awayGoals": null,
+      "homeGoals": 4,
+      "awayGoals": 1,
       "preds": [
         [
           2,
@@ -5858,12 +5858,12 @@
     {
       "file": "luis requena.xlsx",
       "displayName": "Luis \"Aceitunas\" Requena",
-      "totalPoints": 61,
+      "totalPoints": 66,
       "counts": {
         "p6": 4,
-        "p4": 5,
+        "p4": 6,
         "p3": 5,
-        "p1": 2,
+        "p1": 3,
         "p0": 8
       },
       "position": 1,
@@ -5891,19 +5891,20 @@
         2,
         2,
         2,
+        1,
         1
       ],
-      "prevPosition": 2
+      "prevPosition": 1
     },
     {
       "file": "Quiniela Alfredo.xlsx",
       "displayName": "Alfredo Arias",
-      "totalPoints": 61,
+      "totalPoints": 66,
       "counts": {
         "p6": 3,
-        "p4": 4,
+        "p4": 5,
         "p3": 7,
-        "p1": 6,
+        "p1": 7,
         "p0": 4
       },
       "position": 2,
@@ -5931,19 +5932,20 @@
         1,
         1,
         1,
+        2,
         2
       ],
-      "prevPosition": 1
+      "prevPosition": 2
     },
     {
       "file": "emmanuel.xlsx",
       "displayName": "Emmanuel Lambaz",
-      "totalPoints": 60,
+      "totalPoints": 64,
       "counts": {
         "p6": 4,
         "p4": 3,
-        "p3": 5,
-        "p1": 9,
+        "p3": 6,
+        "p1": 10,
         "p0": 3
       },
       "position": 3,
@@ -5971,62 +5973,23 @@
         6,
         6,
         3,
+        3,
         3
       ],
       "prevPosition": 3
     },
     {
-      "file": "SERGIO CAICEDO QUINIELA2026FASEGRUPOS.xlsx",
-      "displayName": "Serginho el mítico",
-      "totalPoints": 60,
-      "counts": {
-        "p6": 2,
-        "p4": 6,
-        "p3": 5,
-        "p1": 9,
-        "p0": 2
-      },
-      "position": 4,
-      "positionHistory": [
-        13,
-        14,
-        10,
-        4,
-        5,
-        2,
-        3,
-        3,
-        3,
-        4,
-        4,
-        5,
-        5,
-        6,
-        6,
-        7,
-        3,
-        3,
-        6,
-        3,
-        3,
-        3,
-        5,
-        4
-      ],
-      "prevPosition": 5
-    },
-    {
       "file": "Jesús.xlsx",
       "displayName": "Jesús \"el topo\" Delgado",
-      "totalPoints": 59,
+      "totalPoints": 64,
       "counts": {
         "p6": 4,
-        "p4": 1,
+        "p4": 2,
         "p3": 8,
-        "p1": 7,
+        "p1": 8,
         "p0": 4
       },
-      "position": 5,
+      "position": 4,
       "positionHistory": [
         7,
         11,
@@ -6051,22 +6014,23 @@
         7,
         7,
         4,
-        5
+        5,
+        4
       ],
-      "prevPosition": 4
+      "prevPosition": 5
     },
     {
       "file": "Alexis Belisario.xlsx",
       "displayName": "Alexis Belisario",
-      "totalPoints": 58,
+      "totalPoints": 63,
       "counts": {
         "p6": 5,
-        "p4": 1,
+        "p4": 2,
         "p3": 6,
-        "p1": 6,
+        "p1": 7,
         "p0": 6
       },
-      "position": 6,
+      "position": 5,
       "positionHistory": [
         1,
         7,
@@ -6091,18 +6055,60 @@
         5,
         5,
         7,
+        6,
+        5
+      ],
+      "prevPosition": 6
+    },
+    {
+      "file": "SERGIO CAICEDO QUINIELA2026FASEGRUPOS.xlsx",
+      "displayName": "Serginho el mítico",
+      "totalPoints": 63,
+      "counts": {
+        "p6": 2,
+        "p4": 6,
+        "p3": 6,
+        "p1": 9,
+        "p0": 3
+      },
+      "position": 6,
+      "positionHistory": [
+        13,
+        14,
+        10,
+        4,
+        5,
+        2,
+        3,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        6,
+        7,
+        3,
+        3,
+        6,
+        3,
+        3,
+        3,
+        5,
+        4,
         6
       ],
-      "prevPosition": 7
+      "prevPosition": 4
     },
     {
       "file": "Juan Carlos.xlsx",
       "displayName": "Juan Carlos",
-      "totalPoints": 56,
+      "totalPoints": 62,
       "counts": {
         "p6": 2,
         "p4": 5,
-        "p3": 6,
+        "p3": 8,
         "p1": 6,
         "p0": 5
       },
@@ -6131,62 +6137,23 @@
         9,
         8,
         8,
+        7,
         7
       ],
-      "prevPosition": 8
-    },
-    {
-      "file": "Quiniela - Miguel Rubio.xlsx",
-      "displayName": "Miguel \"el morcillita\" Rubio",
-      "totalPoints": 55,
-      "counts": {
-        "p6": 4,
-        "p4": 2,
-        "p3": 5,
-        "p1": 8,
-        "p0": 5
-      },
-      "position": 8,
-      "positionHistory": [
-        11,
-        5,
-        1,
-        1,
-        3,
-        4,
-        2,
-        2,
-        2,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        2,
-        2,
-        2,
-        2,
-        6,
-        4,
-        4,
-        6,
-        8
-      ],
-      "prevPosition": 6
+      "prevPosition": 7
     },
     {
       "file": "Luis ortega.xlsx",
       "displayName": "Luis \"el menor del campo\" Ortega",
-      "totalPoints": 53,
+      "totalPoints": 62,
       "counts": {
-        "p6": 1,
+        "p6": 2,
         "p4": 5,
-        "p3": 6,
+        "p3": 7,
         "p1": 9,
         "p0": 3
       },
-      "position": 9,
+      "position": 8,
       "positionHistory": [
         10,
         13,
@@ -6211,17 +6178,59 @@
         10,
         10,
         9,
-        9
+        9,
+        8
       ],
       "prevPosition": 9
     },
     {
+      "file": "Quiniela - Miguel Rubio.xlsx",
+      "displayName": "Miguel \"el morcillita\" Rubio",
+      "totalPoints": 61,
+      "counts": {
+        "p6": 4,
+        "p4": 2,
+        "p3": 7,
+        "p1": 8,
+        "p0": 5
+      },
+      "position": 9,
+      "positionHistory": [
+        11,
+        5,
+        1,
+        1,
+        3,
+        4,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        6,
+        4,
+        4,
+        6,
+        8,
+        9
+      ],
+      "prevPosition": 8
+    },
+    {
       "file": "Angel Diaz .xlsx",
       "displayName": "Angel \"el negro\" Díaz",
-      "totalPoints": 51,
+      "totalPoints": 61,
       "counts": {
-        "p6": 2,
-        "p4": 3,
+        "p6": 3,
+        "p4": 4,
         "p3": 6,
         "p1": 9,
         "p0": 4
@@ -6251,22 +6260,64 @@
         12,
         11,
         10,
+        10,
         10
       ],
       "prevPosition": 10
     },
     {
+      "file": "ALITOX QUINIELA.xlsx",
+      "displayName": "Alito Ortega",
+      "totalPoints": 57,
+      "counts": {
+        "p6": 3,
+        "p4": 4,
+        "p3": 5,
+        "p1": 8,
+        "p0": 6
+      },
+      "position": 11,
+      "positionHistory": [
+        15,
+        10,
+        12,
+        13,
+        15,
+        15,
+        15,
+        15,
+        15,
+        15,
+        14,
+        16,
+        16,
+        16,
+        16,
+        13,
+        12,
+        12,
+        10,
+        11,
+        11,
+        14,
+        15,
+        14,
+        11
+      ],
+      "prevPosition": 14
+    },
+    {
       "file": "Quiniela Yorgel.xlsx",
       "displayName": "Yorgel Plascencia",
-      "totalPoints": 51,
+      "totalPoints": 55,
       "counts": {
         "p6": 2,
         "p4": 2,
-        "p3": 8,
-        "p1": 7,
+        "p3": 9,
+        "p1": 8,
         "p0": 5
       },
-      "position": 11,
+      "position": 12,
       "positionHistory": [
         14,
         15,
@@ -6291,22 +6342,23 @@
         13,
         12,
         11,
-        11
+        11,
+        12
       ],
       "prevPosition": 11
     },
     {
       "file": "david.xlsx",
       "displayName": "David \"el chino\" Caicedo",
-      "totalPoints": 50,
+      "totalPoints": 54,
       "counts": {
         "p6": 3,
         "p4": 2,
-        "p3": 5,
-        "p1": 9,
+        "p3": 6,
+        "p1": 10,
         "p0": 5
       },
-      "position": 12,
+      "position": 13,
       "positionHistory": [
         2,
         1,
@@ -6331,22 +6383,23 @@
         16,
         15,
         12,
-        12
+        12,
+        13
       ],
       "prevPosition": 12
     },
     {
       "file": "Quiniela Gaby  2.xlsx",
       "displayName": "Gaby esposa de Jesús",
-      "totalPoints": 49,
+      "totalPoints": 54,
       "counts": {
         "p6": 2,
-        "p4": 2,
+        "p4": 3,
         "p3": 8,
-        "p1": 5,
+        "p1": 6,
         "p0": 7
       },
-      "position": 13,
+      "position": 14,
       "positionHistory": [
         6,
         3,
@@ -6371,138 +6424,101 @@
         8,
         9,
         13,
-        13
+        13,
+        14
       ],
       "prevPosition": 13
     },
     {
-      "file": "ALITOX QUINIELA.xlsx",
-      "displayName": "Alito Ortega",
-      "totalPoints": 48,
+      "file": "Paul David.xlsx",
+      "displayName": "Paul David",
+      "totalPoints": 52,
       "counts": {
-        "p6": 2,
+        "p6": 1,
         "p4": 4,
-        "p3": 4,
-        "p1": 8,
-        "p0": 6
-      },
-      "position": 14,
-      "positionHistory": [
-        15,
-        10,
-        12,
-        13,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        14,
-        16,
-        16,
-        16,
-        16,
-        13,
-        12,
-        12,
-        10,
-        11,
-        11,
-        14,
-        15,
-        14
-      ],
-      "prevPosition": 15
-    },
-    {
-      "file": "Quiniela Oscar.xlsx",
-      "displayName": "Oscar Dr. Nariz",
-      "totalPoints": 48,
-      "counts": {
-        "p6": 0,
-        "p4": 4,
-        "p3": 8,
-        "p1": 8,
-        "p0": 4
+        "p3": 6,
+        "p1": 12,
+        "p0": 3
       },
       "position": 15,
       "positionHistory": [
-        12,
+        18,
+        18,
+        18,
+        18,
         16,
+        18,
+        18,
         17,
-        14,
-        14,
-        14,
-        13,
-        14,
-        14,
-        14,
-        15,
-        14,
-        14,
-        12,
-        12,
-        14,
+        16,
+        16,
         15,
         15,
         15,
-        14,
-        14,
-        13,
-        14,
+        15,
+        16,
+        16,
+        16,
+        16,
+        16,
+        15,
+        16,
+        16,
+        16,
         15
-      ],
-      "prevPosition": 14
-    },
-    {
-      "file": "Paul David.xlsx",
-      "displayName": "Paul David",
-      "totalPoints": 47,
-      "counts": {
-        "p6": 1,
-        "p4": 3,
-        "p3": 6,
-        "p1": 11,
-        "p0": 3
-      },
-      "position": 16,
-      "positionHistory": [
-        18,
-        18,
-        18,
-        18,
-        16,
-        18,
-        18,
-        17,
-        16,
-        16,
-        15,
-        15,
-        15,
-        15,
-        16,
-        16,
-        16,
-        16,
-        16,
-        15,
-        16,
-        16,
-        16
       ],
       "prevPosition": 16
     },
     {
+      "file": "Quiniela Oscar.xlsx",
+      "displayName": "Oscar Dr. Nariz",
+      "totalPoints": 51,
+      "counts": {
+        "p6": 0,
+        "p4": 4,
+        "p3": 9,
+        "p1": 8,
+        "p0": 5
+      },
+      "position": 16,
+      "positionHistory": [
+        12,
+        16,
+        17,
+        14,
+        14,
+        14,
+        13,
+        14,
+        14,
+        14,
+        15,
+        14,
+        14,
+        12,
+        12,
+        14,
+        15,
+        15,
+        15,
+        14,
+        14,
+        13,
+        14,
+        15,
+        16
+      ],
+      "prevPosition": 15
+    },
+    {
       "file": "quiniela damian.xlsx",
       "displayName": "Damián Lambaz",
-      "totalPoints": 42,
+      "totalPoints": 47,
       "counts": {
         "p6": 1,
-        "p4": 3,
+        "p4": 4,
         "p3": 6,
-        "p1": 6,
+        "p1": 7,
         "p0": 8
       },
       "position": 17,
@@ -6529,6 +6545,7 @@
         17,
         17,
         17,
+        17,
         17
       ],
       "prevPosition": 17
@@ -6536,11 +6553,11 @@
     {
       "file": "JOHNNY QUINIELA.xlsx",
       "displayName": "Johnny Da Silva",
-      "totalPoints": 37,
+      "totalPoints": 46,
       "counts": {
-        "p6": 0,
+        "p6": 1,
         "p4": 3,
-        "p3": 5,
+        "p3": 6,
         "p1": 10,
         "p0": 6
       },
@@ -6561,6 +6578,7 @@
         18,
         18,
         17,
+        18,
         18,
         18,
         18,
