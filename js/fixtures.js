@@ -48,7 +48,17 @@ function scoreMatch(ph, pa, rh, ra) {
 function predCell(pred, actual) {
   const [ph, pa] = pred ?? [null, null];
   if (ph === null || pa === null) return `<span class="text-gray-300">—</span>`;
-  if (actual.homeGoals === null)  return `<span class="text-gray-700 text-[10px]">${ph}-${pa}</span>`;
+  if (actual.homeGoals === null) {
+    let bgCls = '';
+    if (ph > pa) {
+      bgCls = 'bg-blue-100 text-blue-800 border border-blue-200/50';
+    } else if (ph < pa) {
+      bgCls = 'bg-purple-100 text-purple-800 border border-purple-200/50';
+    } else {
+      bgCls = 'bg-orange-100 text-orange-800 border border-orange-200/50';
+    }
+    return `<span class="inline-block px-1 py-px rounded text-[9px] font-bold ${bgCls}">${ph}-${pa}</span>`;
+  }
 
   const pts = scoreMatch(ph, pa, actual.homeGoals, actual.awayGoals);
   const cls = (BADGE[pts] ?? BADGE[0]).replace('font-bold', '').replace('font-semibold', '');
@@ -104,9 +114,9 @@ function voteCircles(fix) {
   };
 
   return `<div class="flex justify-around items-center pt-3 border-t border-gray-100 mt-2">
-    ${fill(home, { bg: 'bg-green-400', border: 'border-green-200' }, shortName(fix.home))}
-    ${fill(draw, { bg: 'bg-amber-400', border: 'border-amber-200' }, 'Emp.')}
-    ${fill(away, { bg: 'bg-blue-400',  border: 'border-blue-200'  }, shortName(fix.away))}
+    ${fill(home, { bg: 'bg-blue-400', border: 'border-blue-200' }, shortName(fix.home))}
+    ${fill(draw, { bg: 'bg-orange-400', border: 'border-orange-200' }, 'Emp.')}
+    ${fill(away, { bg: 'bg-purple-400',  border: 'border-purple-200'  }, shortName(fix.away))}
   </div>`;
 }
 
