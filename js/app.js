@@ -3,8 +3,8 @@
  * wires up UI events. Only the selected player's Excel is fetched at a time.
  */
 
-import { parseWorkbook, computeStandings } from './parser.js';
-import { scoreGroup, BONUS_PER_POSITION } from './scorer.js';
+import { parseWorkbook, computeStandings, ROUNDS_CONFIG } from './parser.js';
+import { scoreGroup, scoreKnockoutRound, BONUS_PER_POSITION, ROUND_RULES } from './scorer.js';
 import { renderPlayerView, renderSidebar, renderLoading, renderError, renderWelcome } from './ui.js';
 import { renderFixtureWidget } from './fixtures.js';
 
@@ -25,6 +25,41 @@ let descriptions = {};
 let photos       = {};
 let scores       = null;
 let activeFile   = null;
+
+export const ROUNDS = [
+  { id: 'total', name: 'Total Acumulado' },
+  { id: 'groups', name: 'Fase de Grupos' },
+  { id: 'round_32_16', name: '16vos y 8vos' },
+  { id: 'quarters', name: 'Cuartos' },
+  { id: 'semis_3rd', name: 'Semis y 3er puesto' },
+  { id: 'final', name: 'Final' }
+];
+
+window._activeRoundId = 'groups';
+
+window._changeRound = (dir) => {
+  const currentIndex = ROUNDS.findIndex(r => r.id === window._activeRoundId);
+  let nextIndex = currentIndex + dir;
+  if (nextIndex < 0) nextIndex = ROUNDS.length - 1;
+  if (nextIndex >= ROUNDS.length) nextIndex = 0;
+  window._activeRoundId = ROUNDS[nextIndex].id;
+  showWelcome();
+};
+
+function getLatestActiveRound(scores) {
+  const fixtures = scores.fixtures || [];
+  if (fixtures.length === 0) return 'groups';
+  
+  if (fixtures[103] && fixtures[103].homeGoals !== null) return 'final';
+  if (fixtures.slice(100, 103).some(f => f.homeGoals !== null)) return 'semis_3rd';
+  if (fixtures.slice(96, 100).some(f => f.homeGoals !== null)) return 'quarters';
+  if (fixtures.slice(72, 96).some(f => f.homeGoals !== null)) return 'round_32_16';
+  
+  const groupsDone = fixtures.slice(0, 72).every(f => f.homeGoals !== null);
+  if (groupsDone) return 'round_32_16';
+  
+  return 'groups';
+}
 
 // Expose selectPlayer for inline onclick in leaderboard name links
 window._selectPlayer = (file) => selectPlayer(file);
@@ -55,9 +90,11 @@ async function init() {
     counts:          p.counts          ?? null,
     position:        p.position        ?? null,
     positionHistory: p.positionHistory ?? [],
+    rounds:          p.rounds          ?? null,
   }));
-  // expose for debugging / future widgets
+  
   window._matchesPlayed = scores.matchesPlayed ?? 0;
+  window._activeRoundId = getLatestActiveRound(scores);
 
   renderSidebar(players, null);
   showWelcome();
@@ -73,6 +110,7 @@ async function init() {
     if (e.target.value) selectPlayer(e.target.value);
   });
 }
+
 // Excel does an atomic rename on save; the file can vanish for ~500 ms.
 async function fetchWithRetry(url, retries = 3, delayMs = 800) {
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -124,10 +162,21 @@ async function selectPlayer(file) {
     // Update total pts in sidebar
     const idx = players.findIndex(p => p.file === file);
     if (idx !== -1) {
-      players[idx].totalPoints = playerData.groups.reduce((sum, pg, i) => {
+      let pts = playerData.groups.reduce((sum, pg, i) => {
         const { totalPoints } = scoreGroup(pg, effectiveMaster.groups[i]);
         return sum + totalPoints;
       }, 0);
+
+      // Add knockout rounds points
+      for (const [key, cfg] of Object.entries(ROUNDS_CONFIG)) {
+        const pm = playerData.rounds[key];
+        const mm = effectiveMaster.rounds[key];
+        if (pm && mm) {
+          pts += scoreKnockoutRound(pm, mm, cfg.rules).totalPoints;
+        }
+      }
+
+      players[idx].totalPoints = pts;
       renderSidebar(players, activeFile);
     }
   } catch (e) {
@@ -148,13 +197,18 @@ function displayName(filename) {
  * so the UI still renders (all matches show as pending).
  */
 function buildEmptyMaster(playerData) {
-  return {
+  const emptyMaster = {
     playerName: 'master',
     groups: playerData.groups.map(g => ({
       ...g,
       matches: g.matches.map(m => ({ ...m, homeGoals: null, awayGoals: null })),
     })),
+    rounds: {}
   };
+  for (const [key, matches] of Object.entries(playerData.rounds || {})) {
+    emptyMaster.rounds[key] = matches.map(m => ({ ...m, homeGoals: null, awayGoals: null }));
+  }
+  return emptyMaster;
 }
 
 init();
@@ -162,7 +216,7 @@ init();
 // ── Permanent top-level listeners (survive every renderWelcome / renderPlayerView) ──
 
 function showWelcome() {
-  renderWelcome(players);
+  renderWelcome(players, window._activeRoundId);
   renderFixtureWidget(document.getElementById('fixture-widget'), scores);
 }
 

@@ -1,68 +1,55 @@
 /**
  * scorer.js — Points calculation for the fantasy World Cup.
- *
- * Scoring rules:
- *   6 pts  — Exact score (home & away goals both correct)
- *   4 pts  — Correct winner + one team's goal count correct
- *   3 pts  — Correct outcome (win or draw) but neither goal count exact
- *   3 pts  — Correct tie prediction but wrong score (alias of above)
- *   1 pt   — One team's goal count correct, wrong outcome
- *   0 pts  — Nothing correct
- *   null   — Match not yet played OR no prediction made
- *
- * Bonus per group (applied when all 6 matches are played):
- *   BONUS_PER_POSITION pts per correctly predicted final position.
  */
 
-export const BONUS_PER_POSITION = 1; // configurable
+export const BONUS_PER_POSITION = 1;
+
+export const ROUND_RULES = {
+  groups:      { exact: 6,  oneGoal: 4,  outcome: 3,  wrongOneGoal: 1, nothing: 0 },
+  round_32_16: { exact: 10, oneGoal: 8,  outcome: 6,  wrongOneGoal: 2, nothing: 0 },
+  quarters:    { exact: 16, oneGoal: 12, outcome: 8,  wrongOneGoal: 4, nothing: 0 },
+  semis_3rd:   { exact: 24, oneGoal: 18, outcome: 12, wrongOneGoal: 6, nothing: 0 },
+  final:       { exact: 36, oneGoal: 28, outcome: 18, wrongOneGoal: 10, nothing: 0 },
+};
 
 /**
  * Score one match.
- * @param {number|null} ph predicted home goals
- * @param {number|null} pa predicted away goals
- * @param {number|null} rh real home goals
- * @param {number|null} ra real away goals
- * @returns {{ points: number|null, reason: string|null }}
  */
 export function scoreMatch(ph, pa, rh, ra) {
-  // Match not yet played
+  return scoreMatchWithRules(ph, pa, rh, ra, ROUND_RULES.groups);
+}
+
+export function scoreMatchWithRules(ph, pa, rh, ra, rules = ROUND_RULES.groups) {
   if (rh === null || ra === null) return { points: null, reason: null };
-  // No prediction
-  if (ph === null || pa === null) return { points: 0, reason: 'Sin predicción' };
+  if (ph === null || pa === null) return { points: 0, reason: 'Sin predicción', tier: 'nothing' };
 
   const exactHome = ph === rh;
   const exactAway = pa === ra;
-  const predOutcome = Math.sign(ph - pa); // -1 / 0 / 1
+  const predOutcome = Math.sign(ph - pa);
   const realOutcome = Math.sign(rh - ra);
   const correctOutcome = predOutcome === realOutcome;
   const oneGoalRight = exactHome || exactAway;
 
   if (exactHome && exactAway) {
-    return { points: 6, reason: 'Resultado exacto' };
+    return { points: rules.exact, reason: 'Resultado exacto', tier: 'exact' };
   }
   if (correctOutcome && oneGoalRight) {
-    return { points: 4, reason: 'Ganador correcto + un marcador acertado' };
+    return { points: rules.oneGoal, reason: 'Ganador correcto + un marcador acertado', tier: 'oneGoal' };
   }
   if (correctOutcome) {
-    return { points: 3, reason: predOutcome === 0
+    return { points: rules.outcome, reason: predOutcome === 0
       ? 'Empate correcto (marcador inexacto)'
-      : 'Ganador correcto (sin marcador acertado)' };
+      : 'Ganador correcto (sin marcador acertado)',
+      tier: 'outcome' };
   }
   if (oneGoalRight) {
-    return { points: 1, reason: 'Un marcador acertado (resultado incorrecto)' };
+    return { points: rules.wrongOneGoal, reason: 'Un marcador acertado (resultado incorrecto)', tier: 'wrongOneGoal' };
   }
-  return { points: 0, reason: 'Ninguna predicción acertada' };
+  return { points: rules.nothing, reason: 'Ninguna predicción acertada', tier: 'nothing' };
 }
 
 /**
  * Score an entire group: match points + standings bonus.
- * @param {object} playerGroup  { matches, standings, teams } from parser
- * @param {object} masterGroup  { matches, standings, teams } from parser (real results)
- * @returns {object} { matchResults, bonusPoints, totalPoints, groupComplete }
- *   matchResults: Array<{ home, away, predH, predA, realH, realA, points, reason }>
- *   bonusPoints:  number (0 if group not complete)
- *   totalPoints:  number
- *   groupComplete: boolean
  */
 export function scoreGroup(playerGroup, masterGroup) {
   const { computeStandings } = window._parserModule;
@@ -86,7 +73,6 @@ export function scoreGroup(playerGroup, masterGroup) {
   let playerFinalStandings = null;
   let masterFinalStandings = null;
 
-  // Always compute player's predicted standings so UI can show them
   playerFinalStandings = computeStandings(playerGroup.teams, playerGroup.matches);
 
   if (groupComplete) {
@@ -103,4 +89,22 @@ export function scoreGroup(playerGroup, masterGroup) {
 
   return { matchResults, bonusPoints, totalPoints, groupComplete,
            playerFinalStandings, masterFinalStandings };
+}
+
+/**
+ * Score a knockout round.
+ */
+export function scoreKnockoutRound(playerMatches, masterMatches, rules) {
+  const matchResults = playerMatches.map((pm, idx) => {
+    const rm = masterMatches[idx];
+    const { points, reason, tier } = scoreMatchWithRules(pm.homeGoals, pm.awayGoals, rm.homeGoals, rm.awayGoals, rules);
+    return {
+      home: rm.home, away: rm.away,
+      predH: pm.homeGoals, predA: pm.awayGoals,
+      realH: rm.homeGoals, realA: rm.awayGoals,
+      points, reason, tier
+    };
+  });
+  const totalPoints = matchResults.reduce((s, r) => s + (r.points ?? 0), 0);
+  return { matchResults, totalPoints };
 }

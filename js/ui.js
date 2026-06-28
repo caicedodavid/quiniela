@@ -1,10 +1,10 @@
-
 /**
  * ui.js — Renders the fantasy World Cup dashboard.
  * All text in Spanish.
  */
 
-import { scoreGroup, BONUS_PER_POSITION } from './scorer.js';
+import { scoreGroup, scoreKnockoutRound, BONUS_PER_POSITION, ROUND_RULES } from './scorer.js';
+import { ROUNDS_CONFIG } from './parser.js';
 
 // ── Country code map (FIFA 3-letter codes) ────────────────────────────────────
 export const TEAM_CODE = {
@@ -26,24 +26,70 @@ export const TEAM_CODE = {
   'T\u00fanez': 'TUN', 'Uruguay': 'URU', 'Uzbekist\u00e1n': 'UZB',
 };
 
+const MATCH_MAP = {
+  // Dieciseisavos (D1-D16)
+  '73': 'D1',  '76': 'D2',  '74': 'D3',  '75': 'D4',
+  '78': 'D5',  '77': 'D6',  '79': 'D7',  '80': 'D8',
+  '82': 'D9',  '81': 'D10', '84': 'D11', '83': 'D12',
+  '85': 'D13', '88': 'D14', '86': 'D15', '87': 'D16',
+  // Octavos (O1-O8)
+  '90': 'O1',  '89': 'O2',  '91': 'O3',  '92': 'O4',
+  '93': 'O5',  '94': 'O6',  '95': 'O7',  '96': 'O8',
+  // Cuartos (C1-C4)
+  '97': 'C1',  '98': 'C2',  '99': 'C3',  '100': 'C4',
+  // Semis (S1-S2)
+  '101': 'S1', '102': 'S2'
+};
+
+function formatTeamName(name) {
+  if (!name) return '?';
+  const prefix = name.substring(0, 1);
+  const matchNum = name.substring(1);
+
+  if ((prefix === 'W' || prefix === 'L') && MATCH_MAP[matchNum]) {
+    const isWinner = prefix === 'W';
+    const label = isWinner ? 'Ganador' : 'Perdedor';
+    return `${label} ${MATCH_MAP[matchNum]}`;
+  }
+
+  // Fallbacks for special finals values
+  if (name === 'WF') return 'Ganador F (Campeón)';
+  if (name === 'LF') return 'Perdedor F (Subcampeón)';
+  if (name === 'W34') return '3º Puesto';
+
+  return name;
+}
+
 /** Full name on desktop, FIFA code on mobile */
 function teamName(name) {
-  const code = TEAM_CODE[name] ?? name;
-  return `<span class="hidden md:inline">${name}</span><span class="md:hidden font-mono">${code}</span>`;
+  const formatted = formatTeamName(name);
+  const code = TEAM_CODE[formatted] ?? formatted;
+  return `<span class="hidden md:inline">${formatted}</span><span class="md:hidden font-mono">${code}</span>`;
 }
 
 // ── Point badge styling ─────────────────────────────────────────────
 export const BADGE = {
-  6:    'bg-green-500  text-white font-bold',
-  4:    'bg-yellow-400 text-yellow-900 font-bold',
-  3:    'bg-yellow-400 text-yellow-900 font-bold',
-  1:    'bg-red-400    text-white font-semibold',
-  0:    'bg-red-700    text-white font-semibold',
-  null: 'bg-gray-100   text-gray-400 italic',
+  exact:        'bg-green-500  text-white font-bold',
+  oneGoal:      'bg-yellow-400 text-yellow-900 font-bold',
+  outcome:      'bg-yellow-400 text-yellow-900 font-bold',
+  wrongOneGoal: 'bg-red-400    text-white font-semibold',
+  nothing:      'bg-red-700    text-white font-semibold',
+  null:         'bg-gray-100   text-gray-400 italic',
 };
 
-function ptsBadge(points, reason) {
-  const cls = BADGE[points] ?? BADGE[null];
+function ptsBadge(points, reason, tier = null) {
+  let cls = BADGE.null;
+  if (points !== null) {
+    if (tier && BADGE[tier]) {
+      cls = BADGE[tier];
+    } else {
+      if (points === 6 || points === 10 || points === 16 || points === 24 || points === 36) cls = BADGE.exact;
+      else if (points === 4 || points === 8 || points === 12 || points === 18 || points === 28) cls = BADGE.oneGoal;
+      else if (points === 3 || points === 6 || points === 8 || points === 12 || points === 18) cls = BADGE.outcome;
+      else if (points === 1 || points === 2 || points === 4 || points === 6 || points === 10) cls = BADGE.wrongOneGoal;
+      else cls = BADGE.nothing;
+    }
+  }
   const label = points === null ? '—' : `${points}pts`;
   const tip = reason ? ` title="${reason}"` : '';
   return `<span class="inline-block px-2 py-0.5 rounded text-sm ${cls} cursor-default"${tip}>${label}</span>`;
@@ -62,7 +108,7 @@ function renderGroup(letter, groupResult, playerGroup) {
   const matchRows = matchResults.map((m, i) => {
     const pred   = scoreFmt(m.predH, m.predA);
     const real   = scoreFmt(m.realH, m.realA);
-    const badge  = ptsBadge(m.points, m.reason);
+    const badge  = ptsBadge(m.points, m.reason, m.points === 6 ? 'exact' : m.points === 4 ? 'oneGoal' : m.points === 3 ? 'outcome' : m.points === 1 ? 'wrongOneGoal' : 'nothing');
     const played = m.realH !== null;
     const rowCls = !played ? 'bg-white' :
                    m.points === 6 ? 'bg-green-50'  :
@@ -83,7 +129,6 @@ function renderGroup(letter, groupResult, playerGroup) {
   // Standings comparison (only when group is complete)
   let standingsHtml = '';
   if (groupComplete && playerFinalStandings && masterFinalStandings) {
-    // Group done: show real vs predicted with bonus + stats
     const stats = computeTableStats(playerGroup.teams, playerGroup.matches);
     const posRows = masterFinalStandings.map((realTeam, pos) => {
       const predTeam = playerFinalStandings[pos];
@@ -131,11 +176,9 @@ function renderGroup(letter, groupResult, playerGroup) {
           </thead>
           <tbody>${posRows}</tbody>
         </table>
-        </div>
       </div>`;
 
   } else if (playerFinalStandings) {
-    // Group not done yet: show predicted positions + stats
     const played = matchResults.filter(m => m.realH !== null).length;
     const stats = computeTableStats(playerGroup.teams, playerGroup.matches);
     const predRows = playerFinalStandings.map((team, pos) => {
@@ -209,6 +252,55 @@ function renderGroup(letter, groupResult, playerGroup) {
     </section>`;
 }
 
+function renderKnockoutCard(name, roundResult) {
+  const { matchResults, totalPoints } = roundResult;
+
+  const matchRows = matchResults.map((m, i) => {
+    const pred   = scoreFmt(m.predH, m.predA);
+    const real   = scoreFmt(m.realH, m.realA);
+    const badge  = ptsBadge(m.points, m.reason, m.tier);
+    const played = m.realH !== null;
+    const rowCls = !played ? 'bg-white' :
+                   m.points > 0 ? 'bg-green-50' : 'bg-red-100';
+    return `
+      <tr class="${rowCls} border-b border-gray-100 hover:brightness-95 transition-all">
+        <td class="py-2 px-3 text-gray-500 text-xs w-6">${i+1}</td>
+        <td class="py-2 px-3 text-right font-medium text-sm">${teamName(m.home)}</td>
+        <td class="py-2 px-3 text-center text-xs text-gray-400">vs</td>
+        <td class="py-2 px-3 font-medium text-sm">${teamName(m.away)}</td>
+        <td class="py-2 px-3 text-center">${pred}</td>
+        <td class="py-2 px-3 text-center">${real}</td>
+        <td class="py-2 px-3 text-center">${badge}</td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-4 md:mb-6">
+      <header class="bg-gradient-to-r from-green-700 to-green-600 px-4 py-3 flex items-center justify-between">
+        <h2 class="text-white font-bold text-base tracking-wide">${name}</h2>
+        <span class="bg-white/20 text-white text-sm font-semibold px-3 py-0.5 rounded-full">${totalPoints} pts</span>
+      </header>
+      <div class="p-2 md:p-4">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-0">
+            <thead class="text-xs text-gray-500 uppercase bg-gray-50">
+              <tr>
+                <th class="py-2 px-2 md:px-3 text-left w-6">#</th>
+                <th class="py-2 px-2 md:px-3 text-right">LOC</th>
+                <th class="py-2 px-1"></th>
+                <th class="py-2 px-2 md:px-3 text-left">VIS</th>
+                <th class="py-2 px-2 md:px-3 text-center">Pred.</th>
+                <th class="py-2 px-2 md:px-3 text-center">Real</th>
+                <th class="py-2 px-2 md:px-3 text-center">Pts</th>
+              </tr>
+            </thead>
+            <tbody>${matchRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </section>`;
+}
+
 // ── Standings stats (J G E P GF GC DG) from predicted matches ────────────────
 function computeTableStats(teams, matches) {
   const s = Object.fromEntries(teams.map(t => [t, { pts:0, j:0, g:0, e:0, p:0, gf:0, gc:0 }]));
@@ -225,14 +317,25 @@ function computeTableStats(teams, matches) {
   return s;
 }
 
+window._profileCache = null;
+window._activePlayerView = 'knockouts';
+
+window._togglePlayerView = (viewId) => {
+  window._activePlayerView = viewId;
+  const { playerData, masterData, playerName, photoUrl, description } = window._profileCache;
+  renderPlayerView(playerData, masterData, playerName, photoUrl, description);
+};
+
 // ── Main content area ─────────────────────────────────────────────────────────
 export function renderPlayerView(playerData, masterData, playerName, photoUrl = '', description = '') {
+  window._profileCache = { playerData, masterData, playerName, photoUrl, description };
+
   const groupResults = playerData.groups.map((pg, i) => {
     const mg = masterData.groups[i];
     return { letter: pg.letter, result: scoreGroup(pg, mg), playerGroup: pg };
   });
 
-  const totalPoints = groupResults.reduce(
+  const totalPointsGroups = groupResults.reduce(
     (s, { result }) => s + result.totalPoints, 0
   );
 
@@ -240,9 +343,50 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
     .map(({ letter, result, playerGroup }) => renderGroup(letter, result, playerGroup))
     .join('');
 
+  // Score all knockout stages
+  const r32_16Result = scoreKnockoutRound(playerData.rounds.round_32_16, masterData.rounds.round_32_16, ROUND_RULES.round_32_16);
+  const quartersResult = scoreKnockoutRound(playerData.rounds.quarters, masterData.rounds.quarters, ROUND_RULES.quarters);
+  const semis_3rdResult = scoreKnockoutRound(playerData.rounds.semis_3rd, masterData.rounds.semis_3rd, ROUND_RULES.semis_3rd);
+  const finalResult = scoreKnockoutRound(playerData.rounds.final, masterData.rounds.final, ROUND_RULES.final);
+
+  // Divide round_32_16 into Dieciseisavos (first 16) and Octavos (next 8)
+  const r32Result = {
+    matchResults: r32_16Result.matchResults.slice(0, 16),
+    totalPoints: r32_16Result.matchResults.slice(0, 16).reduce((s, m) => s + (m.points ?? 0), 0)
+  };
+  const r16Result = {
+    matchResults: r32_16Result.matchResults.slice(16, 24),
+    totalPoints: r32_16Result.matchResults.slice(16, 24).reduce((s, m) => s + (m.points ?? 0), 0)
+  };
+
+  // Divide semis_3rd into Semifinales (first 2) and Tercer Puesto (1 match)
+  const semisResult = {
+    matchResults: semis_3rdResult.matchResults.slice(0, 2),
+    totalPoints: semis_3rdResult.matchResults.slice(0, 2).reduce((s, m) => s + (m.points ?? 0), 0)
+  };
+  const thirdResult = {
+    matchResults: semis_3rdResult.matchResults.slice(2, 3),
+    totalPoints: semis_3rdResult.matchResults.slice(2, 3).reduce((s, m) => s + (m.points ?? 0), 0)
+  };
+
+  // Render cards for knockouts
+  const cardR32      = renderKnockoutCard("Dieciseisavos de Final (D1-D16)", r32Result);
+  const cardR16      = renderKnockoutCard("Octavos de Final (O1-O8)", r16Result);
+  const cardQuarters = renderKnockoutCard("Cuartos de Final (C1-C4)", quartersResult);
+  const cardSemis    = renderKnockoutCard("Semifinales (S1-S2)", semisResult);
+  const cardThird    = renderKnockoutCard("Tercer Puesto", thirdResult);
+  const cardFinal    = renderKnockoutCard("Final", finalResult);
+
+  const koCardsConcat = cardR32 + cardR16 + cardQuarters + cardSemis + cardThird + cardFinal;
+
+  const totalPointsKOs = r32_16Result.totalPoints + quartersResult.totalPoints + semis_3rdResult.totalPoints + finalResult.totalPoints;
+  const totalPoints = totalPointsGroups + totalPointsKOs;
+
+  const isKnockouts = window._activePlayerView === 'knockouts';
+
   document.getElementById('main-content').innerHTML = `
     <!-- Encabezado del jugador -->
-    <div class="mb-4 md:mb-8 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-5 md:p-7 text-white shadow-lg">
+    <div class="mb-4 md:mb-6 bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-5 md:p-7 text-white shadow-lg">
 
       <!-- Top row: photo · name · points -->
       <div class="flex items-start gap-4">
@@ -275,7 +419,7 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
 
       </div>
 
-      <!-- Description below full row, with expand toggle -->
+      <!-- Description below row -->
       ${description ? `
         <div class="mt-2">
           <p id="desc-text"
@@ -296,8 +440,30 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
 
     </div>
 
-    <!-- Grupos -->
-    ${groupCards}
+    <!-- Navigation Widget Tabs Selector -->
+    <div class="flex border border-gray-200 mb-6 bg-white rounded-xl p-1 shadow-sm max-w-sm mx-auto">
+      <button onclick="window._togglePlayerView('knockouts')"
+              class="flex-1 py-2 px-3 rounded-lg text-xs md:text-sm font-bold transition-all text-center select-none
+                     ${isKnockouts
+                       ? 'bg-green-600 text-white shadow-sm'
+                       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}"
+      >
+        Rondas Eliminatorias
+      </button>
+      <button onclick="window._togglePlayerView('groups')"
+              class="flex-1 py-2 px-3 rounded-lg text-xs md:text-sm font-bold transition-all text-center select-none
+                     ${!isKnockouts
+                       ? 'bg-green-600 text-white shadow-sm'
+                       : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}"
+      >
+        Fase de Grupos
+      </button>
+    </div>
+
+    <!-- Cards Display Area -->
+    <div class="space-y-4">
+      ${isKnockouts ? koCardsConcat : groupCards}
+    </div>
   `;
 }
 
@@ -315,20 +481,82 @@ export function renderLoading(name) {
 export function renderError(msg) {
   document.getElementById('main-content').innerHTML = `
     <div class="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-6 text-red-700">
-      <span class="text-2xl">⚠️</span>
+      <span class="text-2xl"></span>
       <p>${msg}</p>
     </div>`;
 }
 
-export function renderWelcome(players) {
-  // Header colours matching the ptsBadge palette
-  const H = {
-    p6: 'bg-green-500  text-white',
-    p4: 'bg-yellow-400 text-yellow-900',
-    p3: 'bg-yellow-200 text-yellow-800',
-    p1: 'bg-red-400    text-white',
-    p0: 'bg-red-700    text-white',
+const ROUND_HEADERS = {
+  total:       ['ex', 'o1', 'ge', 'gl', '0p'],
+  groups:      ['6p', '4p', '3p', '1p', '0p'],
+  round_32_16: ['10p', '8p', '6p', '2p', '0p'],
+  quarters:    ['16p', '12p', '8p', '4p', '0p'],
+  semis_3rd:   ['24p', '18p', '12p', '6p', '0p'],
+  final:       ['36p', '28p', '18p', '10p', '0p']
+};
+
+const ROUND_NAMES_SHORT = {
+  total:       'Total',
+  groups:      'Grupos',
+  round_32_16: '16vos/8vos',
+  quarters:    'Cuartos',
+  semis_3rd:   'Semis/3er',
+  final:       'Final'
+};
+
+function sumCountsAllRounds(p) {
+  const totalCounts = { exact: 0, one_goal: 0, outcome: 0, wrong_one_goal: 0, nothing: 0 };
+  if (!p.rounds) {
+    const c = p.counts || {};
+    return {
+      exact: c.p6 || 0,
+      one_goal: c.p4 || 0,
+      outcome: c.p3 || 0,
+      wrong_one_goal: c.p1 || 0,
+      nothing: c.p0 || 0
+    };
+  }
+  for (const rData of Object.values(p.rounds)) {
+    const rc = rData.counts || {};
+    totalCounts.exact += (rc.exact || 0);
+    totalCounts.one_goal += (rc.one_goal || 0);
+    totalCounts.outcome += (rc.outcome || 0);
+    totalCounts.wrong_one_goal += (rc.wrong_one_goal || 0);
+    totalCounts.nothing += (rc.nothing || 0);
+  }
+  return totalCounts;
+}
+
+function getPlayerRoundStats(p, roundId) {
+  if (roundId === 'total') {
+    const pts = p.totalPoints !== null ? p.totalPoints : 0;
+    const c = sumCountsAllRounds(p);
+    return { points: pts, counts: c };
+  }
+  const rData = p.rounds?.[roundId] || {
+    points: 0,
+    counts: { exact: 0, one_goal: 0, outcome: 0, wrong_one_goal: 0, nothing: 0 }
   };
+  return {
+    points: rData.points || 0,
+    counts: rData.counts || { exact: 0, one_goal: 0, outcome: 0, wrong_one_goal: 0, nothing: 0 }
+  };
+}
+
+export function renderWelcome(players, activeRoundId = 'groups') {
+  // Sort players by total cumulative points descending
+  const sortedPlayers = [...players].sort((a, b) => {
+    const ptsA = a.totalPoints || 0;
+    const ptsB = b.totalPoints || 0;
+    if (ptsB !== ptsA) return ptsB - ptsA;
+    const countsA = sumCountsAllRounds(a);
+    const countsB = sumCountsAllRounds(b);
+    if (countsB.exact !== countsA.exact) return countsB.exact - countsA.exact;
+    if (countsB.one_goal !== countsA.one_goal) return countsB.one_goal - countsA.one_goal;
+    if (countsB.outcome !== countsA.outcome) return countsB.outcome - countsA.outcome;
+    if (countsB.wrong_one_goal !== countsA.wrong_one_goal) return countsB.wrong_one_goal - countsA.wrong_one_goal;
+    return a.displayName.localeCompare(b.displayName);
+  });
 
   const MEDALS = [
     '<span class="inline-flex w-5 h-5 rounded-full bg-yellow-400 text-yellow-900 text-[10px] font-black items-center justify-center">1</span>',
@@ -339,18 +567,19 @@ export function renderWelcome(players) {
     'bg-yellow-50 font-semibold',
     'bg-gray-50',
     'bg-orange-50',
-    'bg-teal-50',   // 4th
-    'bg-teal-50',   // 5th
+    'bg-teal-50',
+    'bg-teal-50',
   ];
   const DANGER_ROW = [
     'bg-[#c19a6b]',
     'bg-red-50/60',
     'bg-red-50/60',
   ];
-  const lastIdx = players.length - 1;
+  const lastIdx = sortedPlayers.length - 1;
 
-  const rows = players.map((p, idx) => {
-    const c       = p.counts ?? {};
+  const rows = sortedPlayers.map((p, idx) => {
+    const stats   = getPlayerRoundStats(p, activeRoundId);
+    const c       = stats.counts;
     const pts     = p.totalPoints ?? '\u2014';
     const fromBot = lastIdx - idx;
     const bot3    = fromBot <= 2;
@@ -375,12 +604,11 @@ export function renderWelcome(players) {
       ? `<span class="inline-flex items-center gap-0.5 leading-none">${badge}</span>`
       : `<span class="text-gray-400 text-[11px]">${idx + 1}</span>`;
 
-    // Movement indicator (last two entries of positionHistory)
+    let mov = '<span class="text-gray-300 text-xs">&mdash;</span>';
     const hist = p.positionHistory ?? [];
     const prevPos = hist.length >= 2 ? hist[hist.length - 2] : null;
-    let mov = '<span class="text-gray-300 text-xs">&mdash;</span>';
     if (prevPos != null) {
-      const diff = prevPos - p.position; // positive = moved up
+      const diff = prevPos - p.position;
       if (diff > 0) {
         mov = `<span class="inline-flex items-center gap-0.5 text-green-600 text-xs font-bold">
                  <span>&#8593;</span><span>${diff}</span>
@@ -393,49 +621,53 @@ export function renderWelcome(players) {
     }
 
     return `
-      <tr class="${rowCls} border-b border-gray-100 hover:brightness-95 transition-all">
+      <tr class="${rowCls} border-b border-gray-100 hover:brightness-95 transition-all text-xs md:text-sm">
         <td class="py-2 px-0 text-center w-6">${rank}</td>
         <td class="py-2.5 px-1 text-center w-8">${mov}</td>
         <td class="py-2.5 px-3 text-sm">
-          <button class="player-link text-left hover:text-green-700 hover:underline transition-colors font-medium"
+          <button class="player-link text-left hover:text-green-700 hover:underline transition-colors font-medium text-xs md:text-sm"
                   data-file="${p.file}"
                   onclick="window._selectPlayer(this.dataset.file)">${p.displayName}</button>
         </td>
-        <td class="py-2.5 px-2 text-center font-mono font-bold text-sm border-l border-gray-200">${pts}</td>
-        <td class="py-2 px-2 text-center text-sm">${c.p6 ?? 0}</td>
-        <td class="py-2 px-2 text-center text-sm">${c.p4 ?? 0}</td>
-        <td class="py-2 px-2 text-center text-sm">${c.p3 ?? 0}</td>
-        <td class="py-2 px-2 text-center text-sm">${c.p1 ?? 0}</td>
-        <td class="py-2 px-2 text-center text-sm">${c.p0 ?? 0}</td>
+        <td class="py-2.5 px-2 text-center font-mono font-bold text-xs md:text-sm border-l border-gray-200">${pts}</td>
+        <td class="py-2 px-1 text-center font-mono text-[11px] md:text-sm">${c.exact}</td>
+        <td class="py-2 px-1 text-center font-mono text-[11px] md:text-sm">${c.one_goal}</td>
+        <td class="py-2 px-1 text-center font-mono text-[11px] md:text-sm">${c.outcome}</td>
+        <td class="py-2 px-1 text-center font-mono text-[11px] md:text-sm">${c.wrong_one_goal}</td>
+        <td class="py-2 px-1 text-center font-mono text-[11px] md:text-sm">${c.nothing}</td>
       </tr>`;
   }).join('');
 
-  // Copy-to-clipboard text: enumerated list with pts to the left
+  // Copy-to-clipboard text
   const stripQuotes = name => name.replace(/"[^"]*"/g, '').replace(/\s+/g, ' ').trim();
-  const lastIdx2 = players.length - 1;
-  const copyText = players.map((p, i) => {
+  const lastIdx2 = sortedPlayers.length - 1;
+  const copyText = sortedPlayers.map((p, i) => {
     const fromBot = lastIdx2 - i;
     let prefix = '';
-    if      (i === 0)       prefix = '\uD83C\uDFC6 '; //  + space
-    else if (i <= 2)        prefix = '\uD83D\uDFE2';  // 
-    else if (i <= 4)        prefix = '\uD83D\uDFE1';  // 
-    else if (fromBot === 0) prefix = '\uD83D\uDCA9';  // 
-    else if (fromBot <= 2)  prefix = '\uD83D\uDD34';  // 
-    return `${prefix}${i + 1}. ${p.totalPoints ?? 0}pts \u2014 ${stripQuotes(p.displayName)}`;
+    if      (i === 0)       prefix = '\uD83C\uDFC6 ';
+    else if (i <= 2)        prefix = '\uD83D\uDFE2';
+    else if (i <= 4)        prefix = '\uD83D\uDFE1';
+    else if (fromBot === 0) prefix = '\uD83D\uDCA9';
+    else if (fromBot <= 2)  prefix = '\uD83D\uDD34';
+    return `${prefix}${i + 1}. ${p.totalPoints}pts \u2014 ${stripQuotes(p.displayName)}`;
   }).join('\n');
+
+  const headers = ROUND_HEADERS[activeRoundId] || ROUND_HEADERS.groups;
+  const roundName = ROUND_NAMES_SHORT[activeRoundId] || ROUND_NAMES_SHORT.groups;
 
   document.getElementById('main-content').innerHTML = `
     <!-- Hero banner -->
     <div class="bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-5 md:p-7 text-white shadow-lg mb-6">
-      <p class="text-green-300 text-xs uppercase tracking-widest font-semibold mb-1">Fase de Grupos</p>
-      <h1 class="text-2xl md:text-3xl font-extrabold mb-1">Quiniela Mundial 2026</h1>
-      <p class="text-green-300 text-sm">${players.length} participantes</p>
+      <p class="text-green-300 text-xs uppercase tracking-widest font-semibold mb-1">Quiniela Mundial 2026</p>
+      <h1 class="text-2xl md:text-3xl font-extrabold mb-1">Clasificación General</h1>
+      <p class="text-green-300 text-sm">${sortedPlayers.length} participantes</p>
     </div>
 
     <div class="max-w-2xl mx-auto">
       <div id="fixture-widget" class="mb-4 md:mb-6"></div>
+
       <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Clasificación general</h2>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Líderes de la quiniela</h2>
         <button id="copy-standings-btn"
           class="flex items-center gap-1.5 text-xs bg-white border border-gray-300
                  hover:border-green-500 hover:text-green-700 text-gray-500
@@ -453,24 +685,44 @@ export function renderWelcome(players) {
         <div class="overflow-x-auto">
         <table class="w-full text-left">
           <thead>
-            <tr class="bg-gray-800 text-xs uppercase tracking-wide">
-              <th class="py-2.5 px-0 text-center text-gray-400 w-6">#</th>
-              <th class="py-2.5 px-1 w-8"></th>
-              <th class="py-2.5 px-3 text-gray-300">Part.</th>
-              <th class="py-2.5 px-2 text-center text-white font-bold border-l border-gray-600">Pts</th>
-              <th class="py-2.5 px-2 text-center ${H.p6}">6P</th>
-              <th class="py-2.5 px-2 text-center ${H.p4}">4P</th>
-              <th class="py-2.5 px-2 text-center ${H.p3}">3P</th>
-              <th class="py-2.5 px-2 text-center ${H.p1}">1P</th>
-              <th class="py-2.5 px-2 text-center ${H.p0}">0P</th>
+            <tr class="bg-gray-800 text-[10px] md:text-xs uppercase tracking-normal">
+              <th class="py-2 px-0 text-center text-gray-400 w-6">#</th>
+              <th class="py-2 px-1 w-8"></th>
+              <th class="py-2 px-3 text-gray-300">Part.</th>
+              <th class="py-2 px-2 text-center text-white font-bold border-l border-gray-600">Pts</th>
+              <th class="py-2 px-1 text-center bg-green-500 text-white font-bold text-[9px] md:text-xs min-w-[32px]">${headers[0]}</th>
+              <th class="py-2 px-1 text-center bg-yellow-400 text-yellow-900 font-bold text-[9px] md:text-xs min-w-[32px]">${headers[1]}</th>
+              <th class="py-2 px-1 text-center bg-yellow-200 text-yellow-800 font-bold text-[9px] md:text-xs min-w-[32px]">${headers[2]}</th>
+              <th class="py-2 px-1 text-center bg-red-400 text-white font-bold text-[9px] md:text-xs min-w-[32px]">${headers[3]}</th>
+              <th class="py-2 px-1 text-center bg-red-700 text-white font-bold text-[9px] md:text-xs min-w-[32px]">${headers[4]}</th>
+            </tr>
+            <!-- Compact round controller row inside the table header -->
+            <tr class="bg-gray-100 text-xs border-b border-gray-200">
+              <th colspan="3" class="py-1"></th>
+              <th class="border-l border-gray-200 py-1"></th>
+              <th colspan="5" class="py-1 px-1">
+                <div class="flex items-center justify-between mx-auto max-w-[170px]">
+                  <button onclick="window._changeRound(-1)" 
+                          class="px-1.5 py-px bg-white hover:bg-gray-200 border border-gray-300 rounded text-[10px] font-bold text-gray-700 transition-colors leading-none select-none">
+                    &lsaquo;
+                  </button>
+                  <span class="font-extrabold text-[9px] md:text-[10px] uppercase tracking-wider text-green-700 font-mono text-center truncate px-1">
+                    ${roundName}
+                  </span>
+                  <button onclick="window._changeRound(1)" 
+                          class="px-1.5 py-px bg-white hover:bg-gray-200 border border-gray-300 rounded text-[10px] font-bold text-gray-700 transition-colors leading-none select-none">
+                    &rsaquo;
+                  </button>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
 
-      <p class="text-xs text-gray-400 mt-3 text-center">
-        Desempate: Pts &rarr; 6P &rarr; 4P &rarr; 3P &rarr; 1P
+      <p class="text-xs text-gray-400 mt-3 text-center p-3">
+        Desempate: Pts &rarr; Exacto &rarr; Ganador+1G &rarr; Ganador &rarr; Un Gol
       </p>
     </div>`;
 
@@ -495,7 +747,6 @@ export function renderWelcome(players) {
 
 // ── Sidebar + mobile select ─────────────────────────────────────────────
 export function renderSidebar(players, activeFile) {
-  // Desktop sidebar buttons
   const items = players.map(p => {
     const active = p.file === activeFile;
     const ptsLabel = p.totalPoints !== null
@@ -518,7 +769,6 @@ export function renderSidebar(players, activeFile) {
   }).join('');
   document.getElementById('player-list').innerHTML = items;
 
-  // Mobile select
   const sel = document.getElementById('mobile-player-select');
   if (sel) {
     sel.innerHTML = `<option value="">Participante…</option>` +

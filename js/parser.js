@@ -1,17 +1,34 @@
 /**
  * parser.js — Extracts group + match data from a worldcup Excel workbook.
- *
- * Sheet layout (WORLDCUP):
- *   Group i (A=0 … L=11):
- *     Match rows  : 4 + 8*i  … 9 + 8*i   (6 rows, cols AA/AF=teams, AC/AD=goals)
- *     Standings   : 6 + 4*i  … 9 + 4*i   (4 rows, col BD=team name)
- *   Team names    : col A, rows (5+8*i) … (8+8*i)
  */
 
 const GROUPS = 'ABCDEFGHIJKL'.split('');
 
 // Column letters → 0-based index (for XLSX.utils.encode_cell)
 const COL = { A:0, AA:26, AC:28, AD:29, AF:31, BD:55, BM:64 };
+
+export const ROUNDS_CONFIG = {
+  round_32_16: {
+    name: '16vos y 8vos de Final',
+    sheetName: '16',
+    rows: [...Array(16).keys()].map(x => x + 101).concat([...Array(8).keys()].map(x => x + 120))
+  },
+  quarters: {
+    name: 'Cuartos de Final',
+    sheetName: '4',
+    rows: [131, 132, 133, 134]
+  },
+  semis_3rd: {
+    name: 'Semifinales y 3er Puesto',
+    sheetName: '2',
+    rows: [138, 139, 143]
+  },
+  final: {
+    name: 'Final',
+    sheetName: '1',
+    rows: [147]
+  }
+};
 
 function cellVal(ws, r, c) {
   // r = 1-based Excel row, c = 0-based col index
@@ -23,13 +40,42 @@ function cellVal(ws, r, c) {
   return (v === '' || v === undefined) ? null : v;
 }
 
+function parseKnockoutRound(ws, rows) {
+  return rows.map(r => {
+    const home      = String(cellVal(ws, r, COL.AA) ?? '?');
+    const away      = String(cellVal(ws, r, COL.AF) ?? '?');
+    const homeGoals = cellVal(ws, r, COL.AC);
+    const awayGoals = cellVal(ws, r, COL.AD);
+    return {
+      home,
+      away,
+      homeGoals: homeGoals !== null ? Number(homeGoals) : null,
+      awayGoals: awayGoals !== null ? Number(awayGoals) : null,
+    };
+  });
+}
+
+function parseKnockoutRoundCustom(ws, numMatches) {
+  const matches = [];
+  for (let idx = 0; idx < numMatches; idx++) {
+    const r = idx + 1; // 1-based row index
+    const home      = String(cellVal(ws, r, 0) ?? '?'); // A is 0
+    const away      = String(cellVal(ws, r, 3) ?? '?'); // D is 3
+    const homeGoals = cellVal(ws, r, 1); // B is 1
+    const awayGoals = cellVal(ws, r, 2); // C is 2
+    matches.push({
+      home,
+      away,
+      homeGoals: homeGoals !== null ? Number(homeGoals) : null,
+      awayGoals: awayGoals !== null ? Number(awayGoals) : null,
+    });
+  }
+  return matches;
+}
+
 /**
  * Parse a workbook buffer (ArrayBuffer) and return structured data.
- * @returns { playerName, groups }
- *   playerName: string (from Home!C10, fallback to filename)
- *   groups: Array<{ letter, teams, matches, standings }>
- *     matches: Array<{ home, away, homeGoals, awayGoals }>  (goals null if unplayed)
- *     standings: Array<string>  [1st, 2nd, 3rd, 4th] team names
+ * @returns { playerName, groups, rounds }
  */
 export function parseWorkbook(buffer, fallbackName = '?') {
   const wb = XLSX.read(buffer, { type: 'array', cellFormula: false });
@@ -85,7 +131,28 @@ export function parseWorkbook(buffer, fallbackName = '?') {
     return { letter, teams, matches, standings };
   });
 
-  return { playerName, groups };
+  const rounds = {};
+  for (const [key, cfg] of Object.entries(ROUNDS_CONFIG)) {
+    // If player workbook does NOT contain the specific sheet name, we leave it empty!
+    // Except if it is master (playerName === 'master' or fallbackName === 'master' or has 'master' in fallbackName)
+    const isMaster = fallbackName.toLowerCase().includes('master');
+    const ws_round = isMaster ? (wb.Sheets[cfg.sheetName] || ws) : wb.Sheets[cfg.sheetName];
+    
+    if (ws_round) {
+      if (isMaster) {
+        rounds[key] = parseKnockoutRound(ws_round, cfg.rows);
+      } else {
+        rounds[key] = parseKnockoutRoundCustom(ws_round, cfg.rows.length);
+      }
+    } else {
+      rounds[key] = cfg.rows.map(() => ({
+        home: '?', away: '?',
+        homeGoals: null, awayGoals: null
+      }));
+    }
+  }
+
+  return { playerName, groups, rounds };
 }
 
 /**

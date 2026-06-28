@@ -1,6 +1,6 @@
 """
 prerender.py — Build-time score computation.
-Reads master.xlsx + every player Excel, scores all groups,
+Reads master.xlsx + every player Excel, scores all groups and subsequent rounds,
 writes data/scores.json sorted by total points descending.
 
 Replaces update_manifest.py (also regenerates the player list).
@@ -33,8 +33,41 @@ COL_BD = 56   # standings team name
 
 TZ_VET = timezone(timedelta(hours=-4))  # Venezuela/Eastern — same offset
 
-
 PLACEHOLDER_NAMES = {"nombre", "name", "player", "jugador"}
+
+# ── Rounds configuration ──────────────────────────────────────────────────────
+ROUNDS_CONFIG = {
+    "groups": {
+        "name": "Fase de Grupos",
+        "sheet_name": "WORLDCUP",
+        "matches": [((4 + 8 * i) + j) for i in range(len(GROUPS)) for j in range(6)],
+        "point_rules": { "exact": 6, "one_goal": 4, "outcome": 3, "wrong_one_goal": 1, "nothing": 0 }
+    },
+    "round_32_16": {
+        "name": "16vos y 8vos",
+        "sheet_name": "16",
+        "matches": list(range(101, 117)) + list(range(120, 128)),
+        "point_rules": { "exact": 10, "one_goal": 8, "outcome": 6, "wrong_one_goal": 2, "nothing": 0 }
+    },
+    "quarters": {
+        "name": "Cuartos",
+        "sheet_name": "4",
+        "matches": list(range(131, 135)),
+        "point_rules": { "exact": 16, "one_goal": 12, "outcome": 8, "wrong_one_goal": 4, "nothing": 0 }
+    },
+    "semis_3rd": {
+        "name": "Semis y 3er puesto",
+        "sheet_name": "2",
+        "matches": [138, 139, 143],
+        "point_rules": { "exact": 24, "one_goal": 18, "outcome": 12, "wrong_one_goal": 6, "nothing": 0 }
+    },
+    "final": {
+        "name": "Final",
+        "sheet_name": "1",
+        "matches": [147],
+        "point_rules": { "exact": 36, "one_goal": 28, "outcome": 18, "wrong_one_goal": 10, "nothing": 0 }
+    }
+}
 
 # ── Excel parsing ─────────────────────────────────────────────────────────────
 
@@ -55,20 +88,17 @@ def _dt_to_ts(dt):
     """Convert a naive datetime (treated as VET/ET UTC-4) to a Unix timestamp."""
     if dt is None:
         return None
-    return int(dt.replace(tzinfo=TZ_VET).timestamp())
-
+    try:
+        return int(dt.replace(tzinfo=TZ_VET).timestamp())
+    except Exception:
+        return None
 
 def extract_fixtures_from_master(wb):
-    """Extract all 72 match records from the master workbook.
-
-    Returns a flat list of dicts (one per match, in sheet order):
-      { ts, home, away, homeGoals, awayGoals }
-    """
+    """Extract all 104 match records from the master workbook."""
     ws = wb["WORLDCUP"]
     records = []
-    for i in range(len(GROUPS)):
-        for j in range(6):
-            r  = (4 + 8 * i) + j
+    for r_id, cfg in ROUNDS_CONFIG.items():
+        for r in cfg["matches"]:
             dt = ws.cell(r, COL_X).value
             records.append({
                 "ts":        _dt_to_ts(dt),
@@ -79,25 +109,30 @@ def extract_fixtures_from_master(wb):
             })
     return records
 
-
 def extract_predictions_flat(wb):
-    """Extract predicted goals for all 72 matches from a player workbook.
+    """Extract predicted goals for all 104 matches from a player workbook.
 
-    Returns a flat list of [homeGoals, awayGoals] pairs (None if not predicted).
+    If a knockout sheet is not present, we return empty predictions [None, None].
     """
-    ws = wb["WORLDCUP"]
     out = []
-    for i in range(len(GROUPS)):
-        for j in range(6):
-            r  = (4 + 8 * i) + j
-            hg = _cell(ws, r, COL_AC)
-            ag = _cell(ws, r, COL_AD)
-            out.append([
-                int(hg) if hg is not None else None,
-                int(ag) if ag is not None else None,
-            ])
-    return out
+    for r_id, cfg in ROUNDS_CONFIG.items():
+        if r_id == "groups":
+            ws = wb["WORLDCUP"]
+        else:
+            sh_name = cfg["sheet_name"]
+            ws = wb[sh_name] if sh_name in wb.sheetnames else None
 
+        for r in cfg["matches"]:
+            if ws is None:
+                out.append([None, None])
+            else:
+                hg = _cell(ws, r, COL_AC)
+                ag = _cell(ws, r, COL_AD)
+                out.append([
+                    int(hg) if hg is not None else None,
+                    int(ag) if ag is not None else None,
+                ])
+    return out
 
 # Grid display name overrides — when the first name of the displayName
 # doesn't match the real name (e.g. nickname IS the name, not in quotes).
@@ -105,7 +140,6 @@ _GRID_OVERRIDES = {
     'Serginho el m\u00edtico': 'Sergio',
     'Emmanuel Lambaz':      'Emma',
 }
-
 
 def grid_short_name(display_name, all_display_names):
     """Return the shortest unambiguous first name for the fixture grid."""
@@ -125,14 +159,8 @@ def grid_short_name(display_name, all_display_names):
         return f"{first} {parts[-1][0]}."
     return first
 
-
-def parse_groups(path):
-    """Return (player_name, groups, wb) from a player Excel file."""
-    wb = openpyxl.load_workbook(path, data_only=True)
-    if "WORLDCUP" not in wb.sheetnames:
-        raise ValueError(f"No WORLDCUP sheet in {path.name}")
+def parse_groups_from_wb(wb):
     ws = wb["WORLDCUP"]
-
     groups = []
     for i, letter in enumerate(GROUPS):
         match_start = 4 + 8 * i
@@ -141,7 +169,7 @@ def parse_groups(path):
         teams = []
         for j in range(4):
             v = _cell(ws, team_start + j, COL_A)
-            teams.append(str(v) if v else f"Equipo{j+1}")
+            teams.append(str(v) if v else f"Equipo${j+1}")
 
         matches = []
         for j in range(6):
@@ -158,27 +186,34 @@ def parse_groups(path):
 
         groups.append({"letter": letter, "teams": teams, "matches": matches})
 
-    player_name = parse_player_name(wb, display_name(path.name))
+    player_name = parse_player_name(wb, "Jugador")
     return player_name, groups, wb
 
+def parse_groups(path):
+    wb = openpyxl.load_workbook(path, data_only=True)
+    if "WORLDCUP" not in wb.sheetnames:
+        raise ValueError(f"No WORLDCUP sheet in {path.name}")
+    player_name, groups, wb = parse_groups_from_wb(wb)
+    player_name = parse_player_name(wb, display_name(path.name))
+    return player_name, groups, wb
 
 # ── Scoring (mirrors js/scorer.js) ───────────────────────────────────────────
 
 def _outcome(h, a):
     return 1 if h > a else (-1 if h < a else 0)
 
-def score_match(ph, pa, rh, ra):
+def score_match_for_rules(ph, pa, rh, ra, point_rules):
     if rh is None or ra is None: return None   # not played
-    if ph is None or pa is None: return 0      # no prediction
+    if ph is None or pa is None: return 0, "nothing"      # no prediction
     exact_h = ph == rh
     exact_a = pa == ra
     correct  = _outcome(ph, pa) == _outcome(rh, ra)
     one_goal = exact_h or exact_a
-    if exact_h and exact_a:  return 6
-    if correct and one_goal: return 4
-    if correct:              return 3
-    if one_goal:             return 1
-    return 0
+    if exact_h and exact_a:  return point_rules["exact"], "exact"
+    if correct and one_goal: return point_rules["one_goal"], "one_goal"
+    if correct:              return point_rules["outcome"], "outcome"
+    if one_goal:             return point_rules["wrong_one_goal"], "wrong_one_goal"
+    return point_rules["nothing"], "nothing"
 
 def compute_standings(teams, matches):
     stats = {t: {"pts": 0, "gf": 0, "ga": 0} for t in teams}
@@ -198,28 +233,73 @@ def compute_standings(teams, matches):
         t,
     ))
 
-def score_player(player_groups, master_groups):
-    total = 0
-    counts = {"p6": 0, "p4": 0, "p3": 0, "p1": 0, "p0": 0}
-    for pg, mg in zip(player_groups, master_groups):
-        for pm, mm in zip(pg["matches"], mg["matches"]):
-            pts = score_match(pm["homeGoals"], pm["awayGoals"],
-                              mm["homeGoals"], mm["awayGoals"])
-            if pts is not None:          # skip unplayed matches
-                total += pts
-                key = f"p{pts}"
-                if key in counts:
-                    counts[key] += 1
+def score_player_all_rounds(player_wb, master_wb, master_groups):
+    """Score a player for all rounds and compile the points and counts."""
+    rounds_data = {}
+    overall_total = 0
 
-        group_done = all(m["homeGoals"] is not None for m in mg["matches"])
-        if group_done:
-            real_s = compute_standings(mg["teams"], mg["matches"])
-            pred_s = compute_standings(pg["teams"], pg["matches"])
-            for pos in range(4):
-                if pred_s[pos] == real_s[pos]:
-                    total += BONUS_PER_POS
-    return total, counts
+    for r_id, cfg in ROUNDS_CONFIG.items():
+        if r_id == "groups":
+            p_ws = player_wb["WORLDCUP"]
+        else:
+            sh_name = cfg["sheet_name"]
+            if sh_name in player_wb.sheetnames:
+                p_ws = player_wb[sh_name]
+            else:
+                p_ws = None
 
+        m_ws = master_wb["WORLDCUP"]
+
+        points = 0
+        counts = { "exact": 0, "one_goal": 0, "outcome": 0, "wrong_one_goal": 0, "nothing": 0 }
+
+        if r_id != "groups" and p_ws is None:
+            rounds_data[r_id] = {
+                "points": 0,
+                "counts": counts,
+                "bonus": 0
+            }
+            continue
+
+        # Score individual matches in this round
+        for r in cfg["matches"]:
+            ph = _cell(p_ws, r, COL_AC)
+            pa = _cell(p_ws, r, COL_AD)
+            rh = _cell(m_ws, r, COL_AC)
+            ra = _cell(m_ws, r, COL_AD)
+
+            ph = int(ph) if ph is not None else None
+            pa = int(pa) if pa is not None else None
+            rh = int(rh) if rh is not None else None
+            ra = int(ra) if ra is not None else None
+
+            res = score_match_for_rules(ph, pa, rh, ra, cfg["point_rules"])
+            if res is not None:
+                pts, tier = res
+                points += pts
+                counts[tier] += 1
+
+        # Standings bonus ONLY for groups
+        bonus_points = 0
+        if r_id == "groups" and master_groups:
+            _, player_groups, _ = parse_groups_from_wb(player_wb)
+            for pg, mg in zip(player_groups, master_groups):
+                group_done = all(m["homeGoals"] is not None for m in mg["matches"])
+                if group_done:
+                    real_s = compute_standings(mg["teams"], mg["matches"])
+                    pred_s = compute_standings(pg["teams"], pg["matches"])
+                    for pos in range(4):
+                        if pred_s[pos] == real_s[pos]:
+                            bonus_points += BONUS_PER_POS
+
+        rounds_data[r_id] = {
+            "points": points + bonus_points,
+            "counts": counts,
+            "bonus": bonus_points if r_id == "groups" else 0
+        }
+        overall_total += (points + bonus_points)
+
+    return overall_total, rounds_data
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
@@ -228,27 +308,28 @@ def display_name(filename):
     return base[0].upper() + base[1:] if base else filename
 
 def load_nicknames():
-    """Return filename->nickname dict, or empty dict if file missing."""
-    if not NICKNAMES.exists():
+    NICKNAMES_PATH = pathlib.Path("data/nicknames.json")
+    if not NICKNAMES_PATH.exists():
         return {}
-    return json.loads(NICKNAMES.read_text(encoding="utf-8"))
-
+    return json.loads(NICKNAMES_PATH.read_text(encoding="utf-8"))
 
 def main():
     nicknames = load_nicknames()
-    # Load master results (optional — no master = all pending)
-    master_groups    = None
-    master_fixtures  = []   # flat list of 72 fixture records
+    
+    # Load master results
+    master_wb = None
+    master_groups = None
+    master_fixtures = []
     if MASTER.exists():
         try:
             master_wb = openpyxl.load_workbook(MASTER, data_only=True)
             _, master_groups, _ = parse_groups(MASTER)
             master_fixtures = extract_fixtures_from_master(master_wb)
-            print(f"master.xlsx cargado")
+            print("master.xlsx cargado")
         except Exception as e:
-            print(f"\u26a0\ufe0f  master.xlsx no se pudo leer: {e}")
+            print(f" master.xlsx no se pudo leer: {e}")
     else:
-        print("\u26a0\ufe0f  master.xlsx no encontrado \u2014 puntos quedar\u00e1n pendientes")
+        print(" master.xlsx no encontrado — puntos quedarán pendientes")
 
     # Score every player file
     xlsx_files = sorted(
@@ -257,61 +338,74 @@ def main():
     )
 
     players = []
-    player_preds = {}  # file -> flat predictions list (72 entries)
+    player_preds = {}  # file -> flat predictions list (104 entries)
     for path in xlsx_files:
         fallback = display_name(path.name)
         try:
-            excel_name, pg, wb = parse_groups(path)
+            player_wb = openpyxl.load_workbook(path, data_only=True)
+            excel_name = parse_player_name(player_wb, fallback)
             name = nicknames.get(path.name, excel_name)
-            player_preds[path.name] = extract_predictions_flat(wb)
-            if master_groups:
-                pts, counts = score_player(pg, master_groups)
+            player_preds[path.name] = extract_predictions_flat(player_wb)
+            if master_wb:
+                pts, rounds_data = score_player_all_rounds(player_wb, master_wb, master_groups)
                 print(f"  {name}: {pts} pts")
             else:
-                pts, counts = None, None
+                pts, rounds_data = None, None
                 print(f"  {name}: pendiente")
         except Exception as e:
             name = nicknames.get(path.name, fallback)
-            print(f"    {name}: error \u2014 {e}")
-            pts, counts = None, None
-            player_preds[path.name] = [[None, None]] * 72
-        players.append({"file": path.name, "displayName": name,
-                        "totalPoints": pts, "counts": counts})
+            print(f"    {name}: error — {e}")
+            pts, rounds_data = None, None
+            player_preds[path.name] = [[None, None]] * 104
 
-    # Tiebreaker: pts desc -> p6 desc -> p4 desc -> p3 desc -> p1 desc -> name asc
+        # backward compatibility fallback for old counts structure
+        p_counts = None
+        if rounds_data and "groups" in rounds_data:
+            g_c = rounds_data["groups"]["counts"]
+            p_counts = {
+                "p6": g_c["exact"],
+                "p4": g_c["one_goal"],
+                "p3": g_c["outcome"],
+                "p1": g_c["wrong_one_goal"],
+                "p0": g_c["nothing"]
+            }
+
+        players.append({
+            "file": path.name,
+            "displayName": name,
+            "totalPoints": pts,
+            "counts": p_counts,
+            "rounds": rounds_data
+        })
+
+    # Sort primarily by overall total points descending
     def sort_key(p):
-        c = p["counts"] or {}
         return (
             p["totalPoints"] is None,
             -(p["totalPoints"] or 0),
-            -c.get("p6", 0),
-            -c.get("p4", 0),
-            -c.get("p3", 0),
-            -c.get("p1", 0),
-            p["displayName"].lower(),   # final alphabetical tiebreaker
+            p["displayName"].lower(),
         )
     players.sort(key=sort_key)
 
-    # Count matches played from master (both goals must be set)
+    # Count total matches played from master
     matches_played = 0
-    if master_groups:
-        for g in master_groups:
-            for m in g["matches"]:
-                if m.get("homeGoals") is not None and m.get("awayGoals") is not None:
+    if master_wb:
+        ws = master_wb["WORLDCUP"]
+        for r_id, cfg in ROUNDS_CONFIG.items():
+            for r in cfg["matches"]:
+                if _cell(ws, r, COL_AC) is not None and _cell(ws, r, COL_AD) is not None:
                     matches_played += 1
-    print(f"Matches played: {matches_played} / 72")
+    print(f"Matches played: {matches_played} / 104")
 
-    # Position history: append only when new matches have been played since last run.
-    # This reliably prevents double-runs (manual, CI, serve loop) from bloating history.
-    history_map  = {}   # file -> list of past positions
-    prev_matches = None # matchesPlayed stored from last run
+    # Position history
+    history_map  = {}
+    prev_matches = None
     if OUT.exists():
         try:
             old = json.loads(OUT.read_text(encoding="utf-8"))
             prev_matches = old.get("matchesPlayed")
             for p in old.get("players", []):
                 hist = p.get("positionHistory")
-                # back-compat: migrate legacy prevPosition into a 2-entry list
                 if not hist and p.get("position") is not None:
                     prev = p.get("prevPosition")
                     hist = ([prev, p["position"]] if prev and prev != p["position"]
@@ -320,13 +414,10 @@ def main():
         except Exception:
             pass
 
-    # Assign current rank
+    # Assign current rank based on overall total points
     for rank, p in enumerate(players, start=1):
         p["position"] = rank
 
-    # Only append to history if more matches have been played than last time.
-    # If prev_matches is None the file predates this field — just bootstrap it,
-    # do NOT treat it as a trigger to append.
     new_results = (prev_matches is not None
                    and matches_played > 0
                    and matches_played != prev_matches)
@@ -338,7 +429,7 @@ def main():
         p["positionHistory"] = hist
         p["prevPosition"]    = hist[-2] if len(hist) >= 2 else None
 
-    # Build fixture grid — sorted alphabetically by first name for consistent columns
+    # Build fixture grid
     all_names = [p["displayName"] for p in players]
     grid_players = sorted(
         players,
@@ -346,12 +437,12 @@ def main():
     )
     fixture_grid = [grid_short_name(p["displayName"], all_names) for p in grid_players]
 
-    # Attach predictions to each fixture (one entry per grid player, in grid order)
+    # Attach predictions to each fixture
     fixtures = []
     for idx, fix in enumerate(master_fixtures):
         preds = []
         for p in grid_players:
-            pair = player_preds.get(p["file"], [[None, None]] * 72)
+            pair = player_preds.get(p["file"], [[None, None]] * 104)
             entry = pair[idx] if idx < len(pair) else [None, None]
             preds.append(entry)
         fixtures.append({
@@ -362,7 +453,6 @@ def main():
             "awayGoals": fix["awayGoals"],
             "preds":     preds,
         })
-    # Sort by kickoff time
     fixtures.sort(key=lambda f: f["ts"] or 0)
 
     OUT.write_text(json.dumps(

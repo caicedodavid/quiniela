@@ -1,6 +1,6 @@
 # Quiniela Mundial 2026
 
-Static fantasy-scoring site for the 2026 World Cup group stage.
+Static fantasy-scoring site for the 2026 World Cup group stage and subsequent knockout rounds.
 Deployed on **Render** (auto-deploys on push to `main`).
 Live: https://quiniela-7nl4.onrender.com
 
@@ -22,8 +22,8 @@ worldcup-fantasy/
 ├── js/
 │   ├── app.js              # Orchestrator: loads scores.json, lazy-loads Excel on click
 │   ├── parser.js           # Excel -> structured group/match/standings data
-│   ├── scorer.js           # Points + standings bonus logic
-│   └── ui.js               # Sidebar, leaderboard, group cards, player banner
+│   ├── scorer.js           # Points + stage bonus + knockout stage logic
+│   └── ui.js               # Sidebar, leaderboard, stage cards, player banner
 │
 ├── vendor/
 │   └── xlsx.full.min.js    # SheetJS 0.18.5 (vendored — CDN blocked on Walmart network)
@@ -174,26 +174,25 @@ Photos live in `data/photos/`. Any filename, any extension (jpg/jpeg/png/webp).
 
 ---
 
-## Scoring rules
+## Scoring rules per stage
 
-| Situation | Points |
-|-----------|--------|
-| Exact score | 6 |
-| Correct winner/draw + one goal correct | 4 |
-| Correct winner/draw, no goal correct | 3 |
-| Wrong outcome but one goal correct | 1 |
-| Nothing correct | 0 |
-| Match not yet played | — (null) |
+Point structures span 5 prediction tiers across all stages. Standing bonuses only apply to group stage.
 
-**Standings bonus:** `BONUS_PER_POSITION = 1` pt per correctly predicted final group
-position, applied only when all 6 group matches are played.
-Constant lives in **`js/scorer.js`** and **`prerender.py`** — keep in sync.
+| Stage / Round | Tier 4 (Exact) | Tier 3 (Gain + 1G) | Tier 2 (Outcome only) | Tier 1 (1 Goal only) | Tier 0 (Nothing) |
+|---|---|---|---|---|---|
+| **Fase de Grupos** (72 matches) | 6 pts | 4 pts | 3 pts | 1 pt | 0 pts |
+| **16vos y 8vos** (24 matches) | 10 pts | 8 pts | 6 pts | 2 pts | 0 pts |
+| **Cuartos** (4 matches) | 16 pts | 12 pts | 8 pts | 4 pts | 0 pts |
+| **Semis y 3er puesto** (3 matches) | 24 pts | 18 pts | 12 pts | 6 pts | 0 pts |
+| **Final** (1 match) | 36 pts | 28 pts | 18 pts | 10 pts | 0 pts |
 
-**Tiebreaker order:** Pts -> 6P -> 4P -> 3P -> 1P -> alphabetical
+**Standings bonus (Group Stage only):** `BONUS_PER_POSITION = 1` pt per correctly predicted final group position, applied only when all 6 group matches are played.
 
 ---
 
 ## scores.json structure
+
+Each player includes stage breakdowns under the `rounds` block:
 
 ```json
 {
@@ -201,28 +200,51 @@ Constant lives in **`js/scorer.js`** and **`prerender.py`** — keep in sync.
     {
       "file": "david.xlsx",
       "displayName": "David \"el chino\" Caicedo",
-      "totalPoints": 12,
-      "counts": { "p6": 1, "p4": 1, "p3": 0, "p1": 0, "p0": 0 },
+      "totalPoints": 197,
       "position": 1,
-      "prevPosition": 2
+      "prevPosition": 2,
+      "positionHistory": [2, 1],
+      "rounds": {
+        "groups": {
+          "points": 187,
+          "counts": {
+            "exact": 12,
+            "one_goal": 15,
+            "outcome": 10,
+            "wrong_one_goal": 8,
+            "nothing": 21
+          },
+          "bonus": 10
+        },
+        "round_32_16": {
+          "points": 10,
+          "counts": {
+            "exact": 1,
+            "one_goal": 0,
+            "outcome": 0,
+            "wrong_one_goal": 0,
+            "nothing": 0
+          },
+          "bonus": 0
+        }
+      }
     }
   ]
 }
 ```
 
-`prevPosition` is only set if the previous run had at least one scored player
-(avoids storing the meaningless all-zero pre-game ordering).
-
 ---
 
 ## Leaderboard (home page) features
 
+- **Dynamic Stage Controller (Embedded)**: Integrated right under the point headers in the table. Toggling stages (using inline `<` and `>` buttons) swaps stage headers and point counts dynamically while keeping rankings and overall total points completely stable.
+- **Auto-Detect Stage on Load**: Automatically boots to the latest active stage with match play (or switches to `16vos/8vos` as group play completes).
 - **Top 3:** gold / silver / bronze circles + coloured row backgrounds
 - **4th & 5th:** teal circles + `bg-teal-50` rows
 - **16th & 17th:** red circles + `bg-red-50` rows
 - **18th (last):** plain number + poop + brown `bg-[#c19a6b]` row
 - **Movement column:** green `up-arrow + N` / red `down-arrow + N` / dash
-- **Player name links:** clicking a name loads their full fantasy profile
+- **Player name links:** clicking a name loads their full fantasy profile including group and knockout cards.
 - **Copy button:** copies ranked list to clipboard, stripping quoted nicknames
 
 ---
@@ -231,7 +253,8 @@ Constant lives in **`js/scorer.js`** and **`prerender.py`** — keep in sync.
 
 - Profile photo (1:1, face-cropped) or initials avatar fallback
 - Name + scrollable bio (`max-h-16 overflow-y-auto`, `whitespace-pre-line`)
-- Total points right-aligned
+- Total points right-aligned (cumulative of all group and knockout stages)
+- Stage cards: Renders group standings/matches alongside knockout stage details with custom point badge states.
 
 ---
 
@@ -251,12 +274,18 @@ git push    # Render auto-deploys on push to main
 
 ## Excel layout (WORLDCUP sheet)
 
-Groups A-L, indexed `i = 0..11`:
+Groups A-L (indices 0-11), followed by subsequent knockout stages:
 
-| Data | Rows | Column |
-|------|------|--------|
-| Match fixtures | `4+8i` ... `9+8i` | AA=home, AC=home goals, AD=away goals, AF=away |
-| Team names | `5+8i` ... `8+8i` | A |
-| Standings | `6+4i` ... `9+4i` | BD |
+| Section | Rows | Column | Sheet lookup |
+|------|------|--------|---|
+| Group matches | `4+8i` ... `9+8i` | AA=home, AC=home goals, AD=away goals, AF=away | `WORLDCUP` |
+| Group team names | `5+8i` ... `8+8i` | A | `WORLDCUP` |
+| Group standings | `6+4i` ... `9+4i` | BD | `WORLDCUP` |
+| **Round of 32** (1/16) | 101 to 116 | AA=home, AC=home goals, AD=away goals, AF=away | `16` or `WORLDCUP` |
+| **Round of 16** (1/8) | 120 to 127 | AA=home, AC=home goals, AD=away goals, AF=away | `16` or `WORLDCUP` |
+| **Quarter-Finals** (1/4) | 131 to 134 | AA=home, AC=home goals, AD=away goals, AF=away | `4` or `WORLDCUP` |
+| **Semifinals** (1/2) | 138 to 139 | AA=home, AC=home goals, AD=away goals, AF=away | `2` or `WORLDCUP` |
+| **Third Place** (3-4) | 143 | AA=home, AC=home goals, AD=away goals, AF=away | `2` or `WORLDCUP` |
+| **Final** (F) | 147 | AA=home, AC=home goals, AD=away goals, AF=away | `1` or `WORLDCUP` |
 
 Player name: `Home!C10` (falls back to `nicknames.json` -> filename).
