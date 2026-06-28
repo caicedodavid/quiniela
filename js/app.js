@@ -91,6 +91,7 @@ async function init() {
     position:        p.position        ?? null,
     positionHistory: p.positionHistory ?? [],
     rounds:          p.rounds          ?? null,
+    forfeited:       p.forfeited       ?? false,
   }));
   
   window._matchesPlayed = scores.matchesPlayed ?? 0;
@@ -152,6 +153,7 @@ async function selectPlayer(file) {
       loadMaster(),
     ]);
     const playerData = parseWorkbook(playerBuf, nickname);
+    playerData.forfeited = player?.forfeited ?? false;
     const effectiveMaster = master ?? buildEmptyMaster(playerData);
     const photoFile  = photos[file] ?? '';
     const photoUrl    = photoFile ? `data/photos/${photoFile}` : '';

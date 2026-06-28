@@ -254,9 +254,10 @@ function renderGroup(letter, groupResult, playerGroup) {
 
 function renderKnockoutCard(name, roundResult) {
   const { matchResults, totalPoints } = roundResult;
+  const isForfeit = window._profileCache && window._profileCache.playerData && window._profileCache.playerData.forfeited === true;
 
   const matchRows = matchResults.map((m, i) => {
-    const pred   = scoreFmt(m.predH, m.predA);
+    const pred   = isForfeit ? '<span class="text-red-600 font-bold">F</span>' : scoreFmt(m.predH, m.predA);
     const real   = scoreFmt(m.realH, m.realA);
     const badge  = ptsBadge(m.points, m.reason, m.tier);
     const played = m.realH !== null;

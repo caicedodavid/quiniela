@@ -46,7 +46,10 @@ const FIXTURE_BADGE_CLASSES = {
   0: 'bg-red-700    text-white'
 };
 
-function predCell(pred, actual) {
+function predCell(pred, actual, isForfeit = false) {
+  if (isForfeit) {
+    return `<span class="text-red-600 font-bold text-[9px]">F</span>`;
+  }
   const [ph, pa] = pred ?? [null, null];
   if (ph === null || pa === null) return `<span class="text-gray-300">—</span>`;
   if (actual.homeGoals === null) {
@@ -66,7 +69,7 @@ function predCell(pred, actual) {
   return `<span class="inline-block px-1 py-px rounded text-[9px] font-bold ${cls}">${ph}-${pa}</span>`;
 }
 
-function renderGrid(gridNames, preds, actual) {
+function renderGrid(gridNames, preds, actual, isKnockout = false) {
   const COLS = 5;
   const rows = [];
   for (let r = 0; r < Math.ceil(gridNames.length / COLS); r++) {
@@ -78,9 +81,10 @@ function renderGrid(gridNames, preds, actual) {
     const spacer = `<div class="invisible" aria-hidden="true"></div>`;
     const cells  = slice.map((name, ci) => {
       const gi = r * COLS + ci;
+      const isForfeit = (name === 'Juan') && isKnockout;
       return `<div class="flex flex-col items-center bg-gray-50 rounded-lg px-1 py-1.5 min-w-0">
         <span class="text-[9px] font-semibold text-gray-500 uppercase tracking-wide truncate w-full text-center leading-none">${name}</span>
-        <span class="text-xs mt-0.5 leading-none">${predCell(preds[gi], actual)}</span>
+        <span class="text-xs mt-0.5 leading-none">${predCell(preds[gi], actual, isForfeit)}</span>
       </div>`;
     }).join('');
 
@@ -89,10 +93,11 @@ function renderGrid(gridNames, preds, actual) {
   return rows.join('');
 }
 
-function voteCircles(fix) {
+function voteCircles(fix, gridNames = [], isKnockout = false) {
   let home = 0, draw = 0, away = 0;
-  fix.preds.forEach(([ph, pa]) => {
+  fix.preds.forEach(([ph, pa], gi) => {
     if (ph === null || pa === null) return;
+    if (isKnockout && gridNames[gi] === 'Juan') return;
     if (ph > pa) home++;
     else if (ph < pa) away++;
     else draw++;
@@ -161,8 +166,8 @@ function buildHtml(scores, idx) {
         </div>
         ${nav(+1, '&rsaquo;')}
       </div>
-      <div class="space-y-1.5">${renderGrid(gridNames, fix.preds, fix)}</div>
-      ${voteCircles(fix)}
+      <div class="space-y-1.5">${renderGrid(gridNames, fix.preds, fix, idx >= 72)}</div>
+      ${voteCircles(fix, gridNames, idx >= 72)}
     </div>`;
 }
 

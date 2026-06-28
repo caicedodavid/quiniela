@@ -5861,8 +5861,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          1,
+          2
         ],
         [
           1,
@@ -5942,8 +5942,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          2,
+          1
         ],
         [
           3,
@@ -5966,8 +5966,8 @@
           1
         ],
         [
-          1,
-          2
+          2,
+          1
         ],
         [
           2,
@@ -6023,8 +6023,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          3,
+          1
         ],
         [
           2,
@@ -6104,8 +6104,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          2,
+          1
         ],
         [
           2,
@@ -6185,8 +6185,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          1,
+          3
         ],
         [
           1,
@@ -6266,7 +6266,7 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
+          3,
           0
         ],
         [
@@ -6347,8 +6347,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          1,
+          2
         ],
         [
           3,
@@ -6428,7 +6428,7 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
+          2,
           0
         ],
         [
@@ -6509,8 +6509,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          1,
+          2
         ],
         [
           2,
@@ -6590,7 +6590,7 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
+          2,
           0
         ],
         [
@@ -6671,8 +6671,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          2,
+          1
         ],
         [
           2,
@@ -6752,8 +6752,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          2,
+          1
         ],
         [
           2,
@@ -6833,8 +6833,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          1,
+          2
         ],
         [
           2,
@@ -6915,7 +6915,7 @@
       "preds": [
         [
           0,
-          0
+          2
         ],
         [
           1,
@@ -6995,7 +6995,7 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
+          3,
           0
         ],
         [
@@ -7076,8 +7076,8 @@
       "awayGoals": null,
       "preds": [
         [
-          0,
-          0
+          2,
+          1
         ],
         [
           2,
@@ -8515,6 +8515,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 1,
       "positionHistory": [
         13,
@@ -8642,6 +8643,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 2,
       "positionHistory": [
         7,
@@ -8769,6 +8771,7 @@
           "bonus": 0
         }
       },
+      "forfeited": true,
       "position": 3,
       "positionHistory": [
         9,
@@ -8896,6 +8899,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 4,
       "positionHistory": [
         4,
@@ -9023,6 +9027,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 5,
       "positionHistory": [
         12,
@@ -9150,6 +9155,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 6,
       "positionHistory": [
         1,
@@ -9277,6 +9283,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 7,
       "positionHistory": [
         6,
@@ -9404,6 +9411,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 8,
       "positionHistory": [
         10,
@@ -9531,6 +9539,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 9,
       "positionHistory": [
         3,
@@ -9658,6 +9667,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 10,
       "positionHistory": [
         2,
@@ -9785,6 +9795,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 11,
       "positionHistory": [
         11,
@@ -9912,6 +9923,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 12,
       "positionHistory": [
         15,
@@ -10039,6 +10051,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 13,
       "positionHistory": [
         16,
@@ -10166,6 +10179,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 14,
       "positionHistory": [
         8,
@@ -10293,6 +10307,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 15,
       "positionHistory": [
         14,
@@ -10420,6 +10435,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 16,
       "positionHistory": [
         5,
@@ -10547,6 +10563,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 17,
       "positionHistory": [
         18,
@@ -10673,6 +10690,7 @@
           "bonus": 0
         }
       },
+      "forfeited": false,
       "position": 18,
       "positionHistory": [
         17,

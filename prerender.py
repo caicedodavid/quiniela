@@ -387,12 +387,14 @@ def main():
                 "p0": g_c["nothing"]
             }
 
+        forfeited = (path.name == "Juan Carlos.xlsx")
         players.append({
             "file": path.name,
             "displayName": name,
             "totalPoints": pts,
             "counts": p_counts,
-            "rounds": rounds_data
+            "rounds": rounds_data,
+            "forfeited": forfeited
         })
 
     # Sort primarily by overall total points descending
