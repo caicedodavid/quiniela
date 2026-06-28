@@ -281,8 +281,8 @@ Groups A-L (indices 0-11), followed by subsequent knockout stages:
 | Group matches | `4+8i` ... `9+8i` | AA=home, AC=home goals, AD=away goals, AF=away | `WORLDCUP` |
 | Group team names | `5+8i` ... `8+8i` | A | `WORLDCUP` |
 | Group standings | `6+4i` ... `9+4i` | BD | `WORLDCUP` |
-| **Round of 32** (1/16) | 101 to 116 | AA=home, AC=home goals, AD=away goals, AF=away | `16` or `WORLDCUP` |
-| **Round of 16** (1/8) | 120 to 127 | AA=home, AC=home goals, AD=away goals, AF=away | `16` or `WORLDCUP` |
+| **Round of 32** (1/16) | 101 to 116 (Master) / 1 to 16 (Player) | AA=home (A), AC=home goals (B), AD=away goals (C), AF=away (D) | `16` or `WORLDCUP` |
+| **Round of 16** (1/8) | 120 to 127 (Master) / 17 to 24 (Player) | AA=home (A), AC=home goals (B), AD=away goals (C), AF=away (D) | `16` or `WORLDCUP` |
 | **Quarter-Finals** (1/4) | 131 to 134 | AA=home, AC=home goals, AD=away goals, AF=away | `4` or `WORLDCUP` |
 | **Semifinals** (1/2) | 138 to 139 | AA=home, AC=home goals, AD=away goals, AF=away | `2` or `WORLDCUP` |
 | **Third Place** (3-4) | 143 | AA=home, AC=home goals, AD=away goals, AF=away | `2` or `WORLDCUP` |

@@ -84,6 +84,18 @@ def parse_player_name(wb, fallback):
             return str(v).strip()
     return fallback
 
+def clean_int(v):
+    if v is None:
+        return None
+    if isinstance(v, int):
+        return v
+    try:
+        s = str(v).strip()
+        s = re.sub(r'[^\d\-]', '', s)
+        return int(s) if s else None
+    except Exception:
+        return None
+
 def _dt_to_ts(dt):
     """Convert a naive datetime (treated as VET/ET UTC-4) to a Unix timestamp."""
     if dt is None:
@@ -104,10 +116,34 @@ def extract_fixtures_from_master(wb):
                 "ts":        _dt_to_ts(dt),
                 "home":      str(_cell(ws, r, COL_AA) or "?"),
                 "away":      str(_cell(ws, r, COL_AF) or "?"),
-                "homeGoals": int(v) if (v := _cell(ws, r, COL_AC)) is not None else None,
-                "awayGoals": int(v) if (v := _cell(ws, r, COL_AD)) is not None else None,
+                "homeGoals": clean_int(v) if (v := _cell(ws, r, COL_AC)) is not None else None,
+                "awayGoals": clean_int(v) if (v := _cell(ws, r, COL_AD)) is not None else None,
             })
     return records
+
+def get_player_prediction(player_wb, r_id, match_idx):
+    """Get player prediction for a specific round and match index within that round.
+    match_idx is 0-based.
+    """
+    cfg = ROUNDS_CONFIG[r_id]
+    sh_name = cfg["sheet_name"]
+    
+    if r_id == "groups":
+        ws = player_wb["WORLDCUP"]
+        row_in_sheet = cfg["matches"][match_idx]
+        hg = _cell(ws, row_in_sheet, COL_AC)
+        ag = _cell(ws, row_in_sheet, COL_AD)
+        return hg, ag
+    
+    # Knockout rounds
+    if sh_name in player_wb.sheetnames:
+        ws = player_wb[sh_name]
+        row_in_sheet = match_idx + 1
+        hg = _cell(ws, row_in_sheet, 2) # Column B is 2
+        ag = _cell(ws, row_in_sheet, 3) # Column C is 3
+        return hg, ag
+    
+    return None, None
 
 def extract_predictions_flat(wb):
     """Extract predicted goals for all 104 matches from a player workbook.
@@ -116,22 +152,12 @@ def extract_predictions_flat(wb):
     """
     out = []
     for r_id, cfg in ROUNDS_CONFIG.items():
-        if r_id == "groups":
-            ws = wb["WORLDCUP"]
-        else:
-            sh_name = cfg["sheet_name"]
-            ws = wb[sh_name] if sh_name in wb.sheetnames else None
-
-        for r in cfg["matches"]:
-            if ws is None:
-                out.append([None, None])
-            else:
-                hg = _cell(ws, r, COL_AC)
-                ag = _cell(ws, r, COL_AD)
-                out.append([
-                    int(hg) if hg is not None else None,
-                    int(ag) if ag is not None else None,
-                ])
+        for idx in range(len(cfg["matches"])):
+            hg, ag = get_player_prediction(wb, r_id, idx)
+            out.append([
+                clean_int(hg) if hg is not None else None,
+                clean_int(ag) if ag is not None else None,
+            ])
     return out
 
 # Grid display name overrides — when the first name of the displayName
@@ -180,8 +206,8 @@ def parse_groups_from_wb(wb):
             ag   = _cell(ws, r, COL_AD)
             matches.append({
                 "home": home, "away": away,
-                "homeGoals": int(hg) if hg is not None else None,
-                "awayGoals": int(ag) if ag is not None else None,
+                "homeGoals": clean_int(hg) if hg is not None else None,
+                "awayGoals": clean_int(ag) if ag is not None else None,
             })
 
         groups.append({"letter": letter, "teams": teams, "matches": matches})
@@ -239,21 +265,11 @@ def score_player_all_rounds(player_wb, master_wb, master_groups):
     overall_total = 0
 
     for r_id, cfg in ROUNDS_CONFIG.items():
-        if r_id == "groups":
-            p_ws = player_wb["WORLDCUP"]
-        else:
-            sh_name = cfg["sheet_name"]
-            if sh_name in player_wb.sheetnames:
-                p_ws = player_wb[sh_name]
-            else:
-                p_ws = None
-
-        m_ws = master_wb["WORLDCUP"]
-
         points = 0
         counts = { "exact": 0, "one_goal": 0, "outcome": 0, "wrong_one_goal": 0, "nothing": 0 }
 
-        if r_id != "groups" and p_ws is None:
+        # Check if knockout sheet is missing for this player
+        if r_id != "groups" and cfg["sheet_name"] not in player_wb.sheetnames:
             rounds_data[r_id] = {
                 "points": 0,
                 "counts": counts,
@@ -261,17 +277,18 @@ def score_player_all_rounds(player_wb, master_wb, master_groups):
             }
             continue
 
+        m_ws = master_wb["WORLDCUP"]
+
         # Score individual matches in this round
-        for r in cfg["matches"]:
-            ph = _cell(p_ws, r, COL_AC)
-            pa = _cell(p_ws, r, COL_AD)
+        for idx, r in enumerate(cfg["matches"]):
+            ph, pa = get_player_prediction(player_wb, r_id, idx)
             rh = _cell(m_ws, r, COL_AC)
             ra = _cell(m_ws, r, COL_AD)
 
-            ph = int(ph) if ph is not None else None
-            pa = int(pa) if pa is not None else None
-            rh = int(rh) if rh is not None else None
-            ra = int(ra) if ra is not None else None
+            ph = clean_int(ph) if ph is not None else None
+            pa = clean_int(pa) if pa is not None else None
+            rh = clean_int(rh) if rh is not None else None
+            ra = clean_int(ra) if ra is not None else None
 
             res = score_match_for_rules(ph, pa, rh, ra, cfg["point_rules"])
             if res is not None:

@@ -1,15 +1,8 @@
 /**
  * fixtures.js — Fixture prediction grid widget.
- *
- * Shows the current/next match and every player's predicted score
- * in a compact 4x4 + 2-player grid sorted alphabetically by first name.
- *
- * "Current match" logic:
- *   Find the fixture whose ts is the smallest value >= (now - 2h).
- *   This covers: match started up to 2 hours ago (in play) or upcoming.
  */
 
-import { TEAM_CODE, BADGE } from './ui.js';
+import { TEAM_CODE } from './ui.js';
 
 const TWO_HOURS = 2 * 60 * 60; // seconds
 
@@ -45,6 +38,14 @@ function scoreMatch(ph, pa, rh, ra) {
   return 0;
 }
 
+const FIXTURE_BADGE_CLASSES = {
+  6: 'bg-green-500  text-white',
+  4: 'bg-yellow-400 text-yellow-900',
+  3: 'bg-yellow-400 text-yellow-900',
+  1: 'bg-red-400    text-white',
+  0: 'bg-red-700    text-white'
+};
+
 function predCell(pred, actual) {
   const [ph, pa] = pred ?? [null, null];
   if (ph === null || pa === null) return `<span class="text-gray-300">—</span>`;
@@ -61,7 +62,7 @@ function predCell(pred, actual) {
   }
 
   const pts = scoreMatch(ph, pa, actual.homeGoals, actual.awayGoals);
-  const cls = (BADGE[pts] ?? BADGE[0]).replace('font-bold', '').replace('font-semibold', '');
+  const cls = FIXTURE_BADGE_CLASSES[pts] || 'bg-red-700 text-white';
   return `<span class="inline-block px-1 py-px rounded text-[9px] font-bold ${cls}">${ph}-${pa}</span>`;
 }
 
