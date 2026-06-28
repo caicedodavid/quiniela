@@ -344,11 +344,13 @@ export function renderPlayerView(playerData, masterData, playerName, photoUrl = 
     .map(({ letter, result, playerGroup }) => renderGroup(letter, result, playerGroup))
     .join('');
 
+  const isForfeit = playerData && playerData.forfeited === true;
+
   // Score all knockout stages
-  const r32_16Result = scoreKnockoutRound(playerData.rounds.round_32_16, masterData.rounds.round_32_16, ROUND_RULES.round_32_16);
-  const quartersResult = scoreKnockoutRound(playerData.rounds.quarters, masterData.rounds.quarters, ROUND_RULES.quarters);
-  const semis_3rdResult = scoreKnockoutRound(playerData.rounds.semis_3rd, masterData.rounds.semis_3rd, ROUND_RULES.semis_3rd);
-  const finalResult = scoreKnockoutRound(playerData.rounds.final, masterData.rounds.final, ROUND_RULES.final);
+  const r32_16Result = scoreKnockoutRound(playerData.rounds.round_32_16, masterData.rounds.round_32_16, ROUND_RULES.round_32_16, isForfeit);
+  const quartersResult = scoreKnockoutRound(playerData.rounds.quarters, masterData.rounds.quarters, ROUND_RULES.quarters, isForfeit);
+  const semis_3rdResult = scoreKnockoutRound(playerData.rounds.semis_3rd, masterData.rounds.semis_3rd, ROUND_RULES.semis_3rd, isForfeit);
+  const finalResult = scoreKnockoutRound(playerData.rounds.final, masterData.rounds.final, ROUND_RULES.final, isForfeit);
 
   // Divide round_32_16 into Dieciseisavos (first 16) and Octavos (next 8)
   const r32Result = {

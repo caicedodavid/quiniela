@@ -94,9 +94,17 @@ export function scoreGroup(playerGroup, masterGroup) {
 /**
  * Score a knockout round.
  */
-export function scoreKnockoutRound(playerMatches, masterMatches, rules) {
+export function scoreKnockoutRound(playerMatches, masterMatches, rules, isForfeit = false) {
   const matchResults = playerMatches.map((pm, idx) => {
     const rm = masterMatches[idx];
+    if (isForfeit) {
+      return {
+        home: rm.home, away: rm.away,
+        predH: pm.homeGoals, predA: pm.awayGoals,
+        realH: rm.homeGoals, realA: rm.awayGoals,
+        points: 0, reason: 'Retirado', tier: 'nothing'
+      };
+    }
     const { points, reason, tier } = scoreMatchWithRules(pm.homeGoals, pm.awayGoals, rm.homeGoals, rm.awayGoals, rules);
     return {
       home: rm.home, away: rm.away,

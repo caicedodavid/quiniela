@@ -174,7 +174,7 @@ async function selectPlayer(file) {
         const pm = playerData.rounds[key];
         const mm = effectiveMaster.rounds[key];
         if (pm && mm) {
-          pts += scoreKnockoutRound(pm, mm, cfg.rules).totalPoints;
+          pts += scoreKnockoutRound(pm, mm, cfg.rules, playerData.forfeited === true).totalPoints;
         }
       }
 

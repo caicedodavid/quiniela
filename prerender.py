@@ -259,7 +259,7 @@ def compute_standings(teams, matches):
         t,
     ))
 
-def score_player_all_rounds(player_wb, master_wb, master_groups):
+def score_player_all_rounds(player_wb, master_wb, master_groups, is_forfeit=False):
     """Score a player for all rounds and compile the points and counts."""
     rounds_data = {}
     overall_total = 0
@@ -267,6 +267,15 @@ def score_player_all_rounds(player_wb, master_wb, master_groups):
     for r_id, cfg in ROUNDS_CONFIG.items():
         points = 0
         counts = { "exact": 0, "one_goal": 0, "outcome": 0, "wrong_one_goal": 0, "nothing": 0 }
+
+        # For forfeited players, they get 0 points and 0 counts for knockouts
+        if is_forfeit and r_id != "groups":
+            rounds_data[r_id] = {
+                "points": 0,
+                "counts": counts,
+                "bonus": 0
+            }
+            continue
 
         # Check if knockout sheet is missing for this player
         if r_id != "groups" and cfg["sheet_name"] not in player_wb.sheetnames:
@@ -363,8 +372,9 @@ def main():
             excel_name = parse_player_name(player_wb, fallback)
             name = nicknames.get(path.name, excel_name)
             player_preds[path.name] = extract_predictions_flat(player_wb)
+            is_forfeit = (path.name == "Juan Carlos.xlsx")
             if master_wb:
-                pts, rounds_data = score_player_all_rounds(player_wb, master_wb, master_groups)
+                pts, rounds_data = score_player_all_rounds(player_wb, master_wb, master_groups, is_forfeit=is_forfeit)
                 print(f"  {name}: {pts} pts")
             else:
                 pts, rounds_data = None, None

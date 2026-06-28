@@ -9222,135 +9222,6 @@
       "prevPosition": 7
     },
     {
-      "file": "Juan Carlos.xlsx",
-      "displayName": "Juan Carlos",
-      "totalPoints": 219,
-      "counts": {
-        "p6": 6,
-        "p4": 18,
-        "p3": 21,
-        "p1": 15,
-        "p0": 12
-      },
-      "rounds": {
-        "groups": {
-          "points": 217,
-          "counts": {
-            "exact": 6,
-            "one_goal": 18,
-            "outcome": 21,
-            "wrong_one_goal": 15,
-            "nothing": 12
-          },
-          "bonus": 31
-        },
-        "round_32_16": {
-          "points": 2,
-          "counts": {
-            "exact": 0,
-            "one_goal": 0,
-            "outcome": 0,
-            "wrong_one_goal": 1,
-            "nothing": 0
-          },
-          "bonus": 0
-        },
-        "quarters": {
-          "points": 0,
-          "counts": {
-            "exact": 0,
-            "one_goal": 0,
-            "outcome": 0,
-            "wrong_one_goal": 0,
-            "nothing": 0
-          },
-          "bonus": 0
-        },
-        "semis_3rd": {
-          "points": 0,
-          "counts": {
-            "exact": 0,
-            "one_goal": 0,
-            "outcome": 0,
-            "wrong_one_goal": 0,
-            "nothing": 0
-          },
-          "bonus": 0
-        },
-        "final": {
-          "points": 0,
-          "counts": {
-            "exact": 0,
-            "one_goal": 0,
-            "outcome": 0,
-            "wrong_one_goal": 0,
-            "nothing": 0
-          },
-          "bonus": 0
-        }
-      },
-      "forfeited": true,
-      "position": 7,
-      "positionHistory": [
-        9,
-        4,
-        8,
-        9,
-        11,
-        11,
-        8,
-        8,
-        8,
-        8,
-        9,
-        8,
-        8,
-        8,
-        9,
-        8,
-        8,
-        8,
-        9,
-        9,
-        9,
-        8,
-        8,
-        7,
-        7,
-        5,
-        8,
-        10,
-        10,
-        10,
-        9,
-        11,
-        10,
-        10,
-        10,
-        9,
-        9,
-        10,
-        9,
-        8,
-        9,
-        11,
-        10,
-        11,
-        12,
-        12,
-        12,
-        12,
-        12,
-        13,
-        13,
-        8,
-        4,
-        3,
-        7
-      ],
-      "prevPosition": 3
-    },
-    {
       "file": "david.xlsx",
       "displayName": "David \"el chino\" Caicedo",
       "totalPoints": 218,
@@ -9419,7 +9290,7 @@
         }
       },
       "forfeited": false,
-      "position": 8,
+      "position": 7,
       "positionHistory": [
         2,
         1,
@@ -9548,7 +9419,7 @@
         }
       },
       "forfeited": false,
-      "position": 9,
+      "position": 8,
       "positionHistory": [
         3,
         8,
@@ -9607,6 +9478,135 @@
         9
       ],
       "prevPosition": 9
+    },
+    {
+      "file": "Juan Carlos.xlsx",
+      "displayName": "Juan Carlos",
+      "totalPoints": 217,
+      "counts": {
+        "p6": 6,
+        "p4": 18,
+        "p3": 21,
+        "p1": 15,
+        "p0": 12
+      },
+      "rounds": {
+        "groups": {
+          "points": 217,
+          "counts": {
+            "exact": 6,
+            "one_goal": 18,
+            "outcome": 21,
+            "wrong_one_goal": 15,
+            "nothing": 12
+          },
+          "bonus": 31
+        },
+        "round_32_16": {
+          "points": 0,
+          "counts": {
+            "exact": 0,
+            "one_goal": 0,
+            "outcome": 0,
+            "wrong_one_goal": 0,
+            "nothing": 0
+          },
+          "bonus": 0
+        },
+        "quarters": {
+          "points": 0,
+          "counts": {
+            "exact": 0,
+            "one_goal": 0,
+            "outcome": 0,
+            "wrong_one_goal": 0,
+            "nothing": 0
+          },
+          "bonus": 0
+        },
+        "semis_3rd": {
+          "points": 0,
+          "counts": {
+            "exact": 0,
+            "one_goal": 0,
+            "outcome": 0,
+            "wrong_one_goal": 0,
+            "nothing": 0
+          },
+          "bonus": 0
+        },
+        "final": {
+          "points": 0,
+          "counts": {
+            "exact": 0,
+            "one_goal": 0,
+            "outcome": 0,
+            "wrong_one_goal": 0,
+            "nothing": 0
+          },
+          "bonus": 0
+        }
+      },
+      "forfeited": true,
+      "position": 9,
+      "positionHistory": [
+        9,
+        4,
+        8,
+        9,
+        11,
+        11,
+        8,
+        8,
+        8,
+        8,
+        9,
+        8,
+        8,
+        8,
+        9,
+        8,
+        8,
+        8,
+        9,
+        9,
+        9,
+        8,
+        8,
+        7,
+        7,
+        5,
+        8,
+        10,
+        10,
+        10,
+        9,
+        11,
+        10,
+        10,
+        10,
+        9,
+        9,
+        10,
+        9,
+        8,
+        9,
+        11,
+        10,
+        11,
+        12,
+        12,
+        12,
+        12,
+        12,
+        13,
+        13,
+        8,
+        4,
+        3,
+        7
+      ],
+      "prevPosition": 3
     },
     {
       "file": "Quiniela - Miguel Rubio.xlsx",
