@@ -1,5 +1,5 @@
 {
-  "matchesPlayed": 74,
+  "matchesPlayed": 75,
   "fixtureGrid": [
     "Alexis",
     "Alfredo",
@@ -6019,8 +6019,8 @@
       "ts": 1782765000,
       "home": "Alemania",
       "away": "Paraguay",
-      "homeGoals": null,
-      "awayGoals": null,
+      "homeGoals": 1,
+      "awayGoals": 1,
       "preds": [
         [
           3,
@@ -8450,7 +8450,7 @@
     {
       "file": "SERGIO CAICEDO QUINIELA2026FASEGRUPOS.xlsx",
       "displayName": "Serginho el mítico",
-      "totalPoints": 241,
+      "totalPoints": 243,
       "counts": {
         "p6": 9,
         "p4": 21,
@@ -8471,12 +8471,12 @@
           "bonus": 34
         },
         "round_32_16": {
-          "points": 6,
+          "points": 8,
           "counts": {
             "exact": 0,
             "one_goal": 0,
             "outcome": 1,
-            "wrong_one_goal": 0,
+            "wrong_one_goal": 1,
             "nothing": 1
           },
           "bonus": 0
@@ -8573,6 +8573,7 @@
         1,
         1,
         1,
+        1,
         1
       ],
       "prevPosition": 1
@@ -8607,7 +8608,7 @@
             "one_goal": 1,
             "outcome": 0,
             "wrong_one_goal": 0,
-            "nothing": 0
+            "nothing": 1
           },
           "bonus": 0
         },
@@ -8703,39 +8704,40 @@
         3,
         4,
         3,
+        2,
         2
       ],
-      "prevPosition": 3
+      "prevPosition": 2
     },
     {
-      "file": "Jesús.xlsx",
-      "displayName": "Jesús \"el topo\" Delgado",
-      "totalPoints": 233,
+      "file": "Quiniela - Miguel Rubio.xlsx",
+      "displayName": "Miguel \"el morcillita\" Rubio",
+      "totalPoints": 234,
       "counts": {
-        "p6": 10,
-        "p4": 17,
-        "p3": 16,
-        "p1": 15,
-        "p0": 14
+        "p6": 9,
+        "p4": 14,
+        "p3": 20,
+        "p1": 18,
+        "p0": 11
       },
       "rounds": {
         "groups": {
-          "points": 221,
+          "points": 210,
           "counts": {
-            "exact": 10,
-            "one_goal": 17,
-            "outcome": 16,
-            "wrong_one_goal": 15,
-            "nothing": 14
+            "exact": 9,
+            "one_goal": 14,
+            "outcome": 20,
+            "wrong_one_goal": 18,
+            "nothing": 11
           },
-          "bonus": 30
+          "bonus": 22
         },
         "round_32_16": {
-          "points": 12,
+          "points": 24,
           "counts": {
-            "exact": 0,
-            "one_goal": 0,
-            "outcome": 2,
+            "exact": 1,
+            "one_goal": 1,
+            "outcome": 1,
             "wrong_one_goal": 0,
             "nothing": 0
           },
@@ -8778,69 +8780,70 @@
       "forfeited": false,
       "position": 3,
       "positionHistory": [
-        7,
         11,
-        13,
-        12,
-        6,
-        6,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        9,
-        8,
-        11,
-        10,
-        10,
-        7,
-        7,
-        7,
-        7,
+        5,
+        1,
+        1,
+        3,
         4,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        6,
+        4,
+        4,
+        6,
+        8,
+        9,
+        7,
+        7,
+        7,
+        6,
+        7,
+        3,
+        3,
+        6,
+        6,
         5,
         4,
-        9,
-        11,
-        9,
-        8,
-        8,
-        11,
-        9,
-        9,
-        9,
-        8,
-        7,
-        8,
-        8,
-        7,
-        7,
-        6,
-        6,
-        6,
-        8,
-        8,
-        8,
-        9,
-        9,
-        8,
-        8,
         4,
         3,
+        3,
+        3,
+        3,
+        3,
         2,
-        2,
-        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        6,
+        7,
+        6,
+        11,
+        10,
+        9,
         3
       ],
-      "prevPosition": 2
+      "prevPosition": 9
     },
     {
       "file": "Alexis Belisario.xlsx",
       "displayName": "Alexis Belisario",
-      "totalPoints": 231,
+      "totalPoints": 233,
       "counts": {
         "p6": 8,
         "p4": 20,
@@ -8861,12 +8864,12 @@
           "bonus": 26
         },
         "round_32_16": {
-          "points": 16,
+          "points": 18,
           "counts": {
             "exact": 1,
             "one_goal": 0,
             "outcome": 1,
-            "wrong_one_goal": 0,
+            "wrong_one_goal": 1,
             "nothing": 0
           },
           "bonus": 0
@@ -8963,14 +8966,15 @@
         5,
         6,
         5,
+        4,
         4
       ],
-      "prevPosition": 5
+      "prevPosition": 4
     },
     {
       "file": "Quiniela Gaby  2.xlsx",
       "displayName": "Gaby esposa de Jesús",
-      "totalPoints": 231,
+      "totalPoints": 233,
       "counts": {
         "p6": 6,
         "p4": 18,
@@ -8991,12 +8995,12 @@
           "bonus": 28
         },
         "round_32_16": {
-          "points": 18,
+          "points": 20,
           "counts": {
             "exact": 1,
             "one_goal": 1,
             "outcome": 0,
-            "wrong_one_goal": 0,
+            "wrong_one_goal": 1,
             "nothing": 0
           },
           "bonus": 0
@@ -9093,32 +9097,33 @@
         8,
         7,
         6,
+        5,
         5
       ],
-      "prevPosition": 6
+      "prevPosition": 5
     },
     {
-      "file": "Quiniela Oscar.xlsx",
-      "displayName": "Oscar Dr. Nariz",
-      "totalPoints": 228,
+      "file": "Jesús.xlsx",
+      "displayName": "Jesús \"el topo\" Delgado",
+      "totalPoints": 233,
       "counts": {
-        "p6": 6,
-        "p4": 19,
-        "p3": 18,
-        "p1": 17,
-        "p0": 12
+        "p6": 10,
+        "p4": 17,
+        "p3": 16,
+        "p1": 15,
+        "p0": 14
       },
       "rounds": {
         "groups": {
-          "points": 216,
+          "points": 221,
           "counts": {
-            "exact": 6,
-            "one_goal": 19,
-            "outcome": 18,
-            "wrong_one_goal": 17,
-            "nothing": 12
+            "exact": 10,
+            "one_goal": 17,
+            "outcome": 16,
+            "wrong_one_goal": 15,
+            "nothing": 14
           },
-          "bonus": 33
+          "bonus": 30
         },
         "round_32_16": {
           "points": 12,
@@ -9127,7 +9132,7 @@
             "one_goal": 0,
             "outcome": 2,
             "wrong_one_goal": 0,
-            "nothing": 0
+            "nothing": 1
           },
           "bonus": 0
         },
@@ -9167,6 +9172,137 @@
       },
       "forfeited": false,
       "position": 6,
+      "positionHistory": [
+        7,
+        11,
+        13,
+        12,
+        6,
+        6,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        9,
+        8,
+        11,
+        10,
+        10,
+        7,
+        7,
+        7,
+        7,
+        4,
+        5,
+        4,
+        9,
+        11,
+        9,
+        8,
+        8,
+        11,
+        9,
+        9,
+        9,
+        8,
+        7,
+        8,
+        8,
+        7,
+        7,
+        6,
+        6,
+        6,
+        8,
+        8,
+        8,
+        9,
+        9,
+        8,
+        8,
+        4,
+        3,
+        2,
+        2,
+        2,
+        3,
+        6
+      ],
+      "prevPosition": 3
+    },
+    {
+      "file": "Quiniela Oscar.xlsx",
+      "displayName": "Oscar Dr. Nariz",
+      "totalPoints": 228,
+      "counts": {
+        "p6": 6,
+        "p4": 19,
+        "p3": 18,
+        "p1": 17,
+        "p0": 12
+      },
+      "rounds": {
+        "groups": {
+          "points": 216,
+          "counts": {
+            "exact": 6,
+            "one_goal": 19,
+            "outcome": 18,
+            "wrong_one_goal": 17,
+            "nothing": 12
+          },
+          "bonus": 33
+        },
+        "round_32_16": {
+          "points": 12,
+          "counts": {
+            "exact": 0,
+            "one_goal": 0,
+            "outcome": 2,
+            "wrong_one_goal": 0,
+            "nothing": 1
+          },
+          "bonus": 0
+        },
+        "quarters": {
+          "points": 0,
+          "counts": {
+            "exact": 0,
+            "one_goal": 0,
+            "outcome": 0,
+            "wrong_one_goal": 0,
+            "nothing": 0
+          },
+          "bonus": 0
+        },
+        "semis_3rd": {
+          "points": 0,
+          "counts": {
+            "exact": 0,
+            "one_goal": 0,
+            "outcome": 0,
+            "wrong_one_goal": 0,
+            "nothing": 0
+          },
+          "bonus": 0
+        },
+        "final": {
+          "points": 0,
+          "counts": {
+            "exact": 0,
+            "one_goal": 0,
+            "outcome": 0,
+            "wrong_one_goal": 0,
+            "nothing": 0
+          },
+          "bonus": 0
+        }
+      },
+      "forfeited": false,
+      "position": 7,
       "positionHistory": [
         12,
         16,
@@ -9223,9 +9359,10 @@
         7,
         5,
         4,
-        6
+        6,
+        7
       ],
-      "prevPosition": 4
+      "prevPosition": 6
     },
     {
       "file": "emmanuel.xlsx",
@@ -9257,7 +9394,7 @@
             "one_goal": 0,
             "outcome": 1,
             "wrong_one_goal": 0,
-            "nothing": 0
+            "nothing": 1
           },
           "bonus": 0
         },
@@ -9296,7 +9433,7 @@
         }
       },
       "forfeited": false,
-      "position": 7,
+      "position": 8,
       "positionHistory": [
         3,
         8,
@@ -9353,9 +9490,10 @@
         11,
         9,
         9,
-        7
+        7,
+        8
       ],
-      "prevPosition": 9
+      "prevPosition": 7
     },
     {
       "file": "david.xlsx",
@@ -9387,7 +9525,7 @@
             "one_goal": 2,
             "outcome": 0,
             "wrong_one_goal": 0,
-            "nothing": 0
+            "nothing": 1
           },
           "bonus": 0
         },
@@ -9426,7 +9564,7 @@
         }
       },
       "forfeited": false,
-      "position": 8,
+      "position": 9,
       "positionHistory": [
         2,
         1,
@@ -9483,170 +9621,41 @@
         9,
         10,
         8,
-        8
+        8,
+        9
       ],
       "prevPosition": 8
     },
     {
-      "file": "Quiniela - Miguel Rubio.xlsx",
-      "displayName": "Miguel \"el morcillita\" Rubio",
-      "totalPoints": 224,
+      "file": "Angel Diaz .xlsx",
+      "displayName": "Angel \"el negro\" Díaz",
+      "totalPoints": 222,
       "counts": {
-        "p6": 9,
-        "p4": 14,
-        "p3": 20,
-        "p1": 18,
-        "p0": 11
+        "p6": 7,
+        "p4": 15,
+        "p3": 18,
+        "p1": 19,
+        "p0": 13
       },
       "rounds": {
         "groups": {
-          "points": 210,
+          "points": 202,
           "counts": {
-            "exact": 9,
-            "one_goal": 14,
-            "outcome": 20,
-            "wrong_one_goal": 18,
-            "nothing": 11
+            "exact": 7,
+            "one_goal": 15,
+            "outcome": 18,
+            "wrong_one_goal": 19,
+            "nothing": 13
           },
-          "bonus": 22
+          "bonus": 27
         },
         "round_32_16": {
-          "points": 14,
+          "points": 20,
           "counts": {
-            "exact": 0,
+            "exact": 1,
             "one_goal": 1,
-            "outcome": 1,
-            "wrong_one_goal": 0,
-            "nothing": 0
-          },
-          "bonus": 0
-        },
-        "quarters": {
-          "points": 0,
-          "counts": {
-            "exact": 0,
-            "one_goal": 0,
             "outcome": 0,
-            "wrong_one_goal": 0,
-            "nothing": 0
-          },
-          "bonus": 0
-        },
-        "semis_3rd": {
-          "points": 0,
-          "counts": {
-            "exact": 0,
-            "one_goal": 0,
-            "outcome": 0,
-            "wrong_one_goal": 0,
-            "nothing": 0
-          },
-          "bonus": 0
-        },
-        "final": {
-          "points": 0,
-          "counts": {
-            "exact": 0,
-            "one_goal": 0,
-            "outcome": 0,
-            "wrong_one_goal": 0,
-            "nothing": 0
-          },
-          "bonus": 0
-        }
-      },
-      "forfeited": false,
-      "position": 9,
-      "positionHistory": [
-        11,
-        5,
-        1,
-        1,
-        3,
-        4,
-        2,
-        2,
-        2,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        2,
-        2,
-        2,
-        2,
-        6,
-        4,
-        4,
-        6,
-        8,
-        9,
-        7,
-        7,
-        7,
-        6,
-        7,
-        3,
-        3,
-        6,
-        6,
-        5,
-        4,
-        4,
-        3,
-        3,
-        3,
-        3,
-        3,
-        2,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        3,
-        6,
-        7,
-        6,
-        11,
-        10,
-        9
-      ],
-      "prevPosition": 10
-    },
-    {
-      "file": "ALITOX QUINIELA.xlsx",
-      "displayName": "Alito Ortega",
-      "totalPoints": 221,
-      "counts": {
-        "p6": 9,
-        "p4": 17,
-        "p3": 14,
-        "p1": 18,
-        "p0": 14
-      },
-      "rounds": {
-        "groups": {
-          "points": 207,
-          "counts": {
-            "exact": 9,
-            "one_goal": 17,
-            "outcome": 14,
-            "wrong_one_goal": 18,
-            "nothing": 14
-          },
-          "bonus": 25
-        },
-        "round_32_16": {
-          "points": 14,
-          "counts": {
-            "exact": 0,
-            "one_goal": 1,
-            "outcome": 1,
-            "wrong_one_goal": 0,
+            "wrong_one_goal": 1,
             "nothing": 0
           },
           "bonus": 0
@@ -9688,96 +9697,97 @@
       "forfeited": false,
       "position": 10,
       "positionHistory": [
-        15,
-        10,
-        12,
-        13,
-        15,
-        15,
-        15,
-        15,
-        15,
-        15,
-        14,
         16,
-        16,
-        16,
-        16,
-        13,
-        12,
-        12,
-        10,
-        11,
-        11,
-        14,
-        15,
-        14,
-        11,
-        11,
-        9,
         6,
-        3,
-        5,
-        4,
+        11,
         7,
-        12,
-        12,
+        7,
+        7,
+        6,
+        6,
+        6,
+        7,
+        6,
+        9,
+        9,
+        10,
+        10,
+        9,
+        9,
         9,
         11,
-        10,
-        11,
-        11,
-        13,
         12,
+        12,
+        11,
         10,
-        13,
-        14,
-        13,
-        13,
-        13,
+        10,
+        10,
         8,
+        10,
+        12,
+        12,
+        11,
+        10,
+        12,
+        8,
+        8,
+        12,
+        12,
+        13,
+        12,
+        14,
+        12,
+        11,
         9,
+        8,
         7,
-        7,
-        12,
-        12,
-        12,
+        5,
+        5,
+        5,
+        5,
+        6,
+        5,
+        9,
+        13,
+        13,
+        13,
+        13,
         11,
         10
       ],
       "prevPosition": 11
     },
     {
-      "file": "Angel Diaz .xlsx",
-      "displayName": "Angel \"el negro\" Díaz",
-      "totalPoints": 220,
+      "file": "Luis ortega.xlsx",
+      "displayName": "Luis \"el menor del campo\" Ortega",
+      "totalPoints": 222,
       "counts": {
         "p6": 7,
-        "p4": 15,
+        "p4": 18,
         "p3": 18,
         "p1": 19,
-        "p0": 13
+        "p0": 10
       },
       "rounds": {
         "groups": {
-          "points": 202,
+          "points": 212,
           "counts": {
             "exact": 7,
-            "one_goal": 15,
+            "one_goal": 18,
             "outcome": 18,
             "wrong_one_goal": 19,
-            "nothing": 13
+            "nothing": 10
           },
-          "bonus": 27
+          "bonus": 25
         },
         "round_32_16": {
-          "points": 18,
+          "points": 10,
           "counts": {
-            "exact": 1,
+            "exact": 0,
             "one_goal": 1,
             "outcome": 0,
-            "wrong_one_goal": 0,
-            "nothing": 0
+            "wrong_one_goal": 1,
+            "nothing": 1
           },
           "bonus": 0
         },
@@ -9818,94 +9828,95 @@
       "forfeited": false,
       "position": 11,
       "positionHistory": [
-        16,
-        6,
-        11,
-        7,
-        7,
-        7,
-        6,
-        6,
-        6,
-        7,
-        6,
-        9,
+        10,
+        13,
         9,
         10,
-        10,
-        9,
-        9,
-        9,
-        11,
         12,
         12,
         11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
         10,
+        11,
+        11,
+        12,
+        10,
+        10,
+        10,
+        9,
+        9,
+        8,
+        6,
+        6,
+        4,
+        7,
+        6,
+        8,
+        8,
+        5,
+        5,
+        4,
+        5,
+        5,
+        5,
         10,
         10,
         8,
-        10,
-        12,
-        12,
-        11,
-        10,
-        12,
-        8,
-        8,
-        12,
-        12,
-        13,
-        12,
-        14,
-        12,
-        11,
-        9,
-        8,
         7,
-        5,
-        5,
-        5,
-        5,
-        6,
-        5,
         9,
-        13,
-        13,
-        13,
-        13,
+        10,
+        10,
+        9,
+        6,
+        10,
+        11,
+        10,
+        8,
+        6,
+        10,
+        8,
+        12,
+        12,
         11
       ],
-      "prevPosition": 13
+      "prevPosition": 12
     },
     {
-      "file": "Luis ortega.xlsx",
-      "displayName": "Luis \"el menor del campo\" Ortega",
-      "totalPoints": 220,
+      "file": "ALITOX QUINIELA.xlsx",
+      "displayName": "Alito Ortega",
+      "totalPoints": 221,
       "counts": {
-        "p6": 7,
-        "p4": 18,
-        "p3": 18,
-        "p1": 19,
-        "p0": 10
+        "p6": 9,
+        "p4": 17,
+        "p3": 14,
+        "p1": 18,
+        "p0": 14
       },
       "rounds": {
         "groups": {
-          "points": 212,
+          "points": 207,
           "counts": {
-            "exact": 7,
-            "one_goal": 18,
-            "outcome": 18,
-            "wrong_one_goal": 19,
-            "nothing": 10
+            "exact": 9,
+            "one_goal": 17,
+            "outcome": 14,
+            "wrong_one_goal": 18,
+            "nothing": 14
           },
           "bonus": 25
         },
         "round_32_16": {
-          "points": 8,
+          "points": 14,
           "counts": {
             "exact": 0,
             "one_goal": 1,
-            "outcome": 0,
+            "outcome": 1,
             "wrong_one_goal": 0,
             "nothing": 1
           },
@@ -9948,64 +9959,65 @@
       "forfeited": false,
       "position": 12,
       "positionHistory": [
+        15,
+        10,
+        12,
+        13,
+        15,
+        15,
+        15,
+        15,
+        15,
+        15,
+        14,
+        16,
+        16,
+        16,
+        16,
+        13,
+        12,
+        12,
+        10,
+        11,
+        11,
+        14,
+        15,
+        14,
+        11,
+        11,
+        9,
+        6,
+        3,
+        5,
+        4,
+        7,
+        12,
+        12,
+        9,
+        11,
+        10,
+        11,
+        11,
+        13,
+        12,
         10,
         13,
-        9,
-        10,
-        12,
-        12,
-        11,
-        11,
-        11,
-        11,
-        11,
-        11,
-        11,
-        11,
-        11,
-        10,
-        11,
-        11,
-        12,
-        10,
-        10,
-        10,
-        9,
-        9,
+        14,
+        13,
+        13,
+        13,
         8,
-        6,
-        6,
-        4,
+        9,
         7,
-        6,
-        8,
-        8,
-        5,
-        5,
-        4,
-        5,
-        5,
-        5,
-        10,
-        10,
-        8,
         7,
-        9,
-        10,
-        10,
-        9,
-        6,
-        10,
+        12,
+        12,
+        12,
         11,
         10,
-        8,
-        6,
-        10,
-        8,
-        12,
         12
       ],
-      "prevPosition": 12
+      "prevPosition": 10
     },
     {
       "file": "Juan Carlos.xlsx",
@@ -10133,14 +10145,15 @@
         4,
         3,
         7,
+        13,
         13
       ],
-      "prevPosition": 7
+      "prevPosition": 13
     },
     {
       "file": "Quiniela Yorgel.xlsx",
       "displayName": "Yorgel Plascencia",
-      "totalPoints": 214,
+      "totalPoints": 216,
       "counts": {
         "p6": 4,
         "p4": 17,
@@ -10161,12 +10174,12 @@
           "bonus": 29
         },
         "round_32_16": {
-          "points": 14,
+          "points": 16,
           "counts": {
             "exact": 0,
             "one_goal": 1,
             "outcome": 1,
-            "wrong_one_goal": 0,
+            "wrong_one_goal": 1,
             "nothing": 0
           },
           "bonus": 0
@@ -10263,6 +10276,7 @@
         16,
         15,
         14,
+        14,
         14
       ],
       "prevPosition": 14
@@ -10270,7 +10284,7 @@
     {
       "file": "Quiniela Alfredo.xlsx",
       "displayName": "Alfredo Arias",
-      "totalPoints": 211,
+      "totalPoints": 213,
       "counts": {
         "p6": 7,
         "p4": 13,
@@ -10291,12 +10305,12 @@
           "bonus": 25
         },
         "round_32_16": {
-          "points": 12,
+          "points": 14,
           "counts": {
             "exact": 0,
             "one_goal": 0,
             "outcome": 2,
-            "wrong_one_goal": 0,
+            "wrong_one_goal": 1,
             "nothing": 0
           },
           "bonus": 0
@@ -10393,6 +10407,7 @@
         14,
         16,
         15,
+        15,
         15
       ],
       "prevPosition": 15
@@ -10400,7 +10415,7 @@
     {
       "file": "Paul David.xlsx",
       "displayName": "Paul David",
-      "totalPoints": 207,
+      "totalPoints": 209,
       "counts": {
         "p6": 7,
         "p4": 12,
@@ -10421,12 +10436,12 @@
           "bonus": 20
         },
         "round_32_16": {
-          "points": 16,
+          "points": 18,
           "counts": {
             "exact": 1,
             "one_goal": 0,
             "outcome": 1,
-            "wrong_one_goal": 0,
+            "wrong_one_goal": 1,
             "nothing": 0
           },
           "bonus": 0
@@ -10522,14 +10537,15 @@
         17,
         17,
         17,
+        16,
         16
       ],
-      "prevPosition": 17
+      "prevPosition": 16
     },
     {
       "file": "JOHNNY QUINIELA.xlsx",
       "displayName": "Johnny Da Silva",
-      "totalPoints": 204,
+      "totalPoints": 206,
       "counts": {
         "p6": 5,
         "p4": 17,
@@ -10550,12 +10566,12 @@
           "bonus": 28
         },
         "round_32_16": {
-          "points": 2,
+          "points": 4,
           "counts": {
             "exact": 0,
             "one_goal": 0,
             "outcome": 0,
-            "wrong_one_goal": 1,
+            "wrong_one_goal": 2,
             "nothing": 1
           },
           "bonus": 0
@@ -10652,14 +10668,15 @@
         15,
         14,
         16,
+        17,
         17
       ],
-      "prevPosition": 16
+      "prevPosition": 17
     },
     {
       "file": "quiniela damian.xlsx",
       "displayName": "Damián Lambaz",
-      "totalPoints": 202,
+      "totalPoints": 204,
       "counts": {
         "p6": 5,
         "p4": 12,
@@ -10680,12 +10697,12 @@
           "bonus": 26
         },
         "round_32_16": {
-          "points": 18,
+          "points": 20,
           "counts": {
             "exact": 1,
             "one_goal": 1,
             "outcome": 0,
-            "wrong_one_goal": 0,
+            "wrong_one_goal": 1,
             "nothing": 0
           },
           "bonus": 0
@@ -10762,6 +10779,7 @@
         17,
         18,
         17,
+        18,
         18,
         18,
         18,
