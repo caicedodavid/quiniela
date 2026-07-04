@@ -125,10 +125,8 @@ def get_player_prediction(player_wb, r_id, match_idx):
     """Get player prediction for a specific round and match index within that round.
     match_idx is 0-based.
     """
-    cfg = ROUNDS_CONFIG[r_id]
-    sh_name = cfg["sheet_name"]
-    
     if r_id == "groups":
+        cfg = ROUNDS_CONFIG[r_id]
         ws = player_wb["WORLDCUP"]
         row_in_sheet = cfg["matches"][match_idx]
         hg = _cell(ws, row_in_sheet, COL_AC)
@@ -136,9 +134,28 @@ def get_player_prediction(player_wb, r_id, match_idx):
         return hg, ag
     
     # Knockout rounds
-    if sh_name in player_wb.sheetnames:
-        ws = player_wb[sh_name]
+    sh_name = None
+    row_in_sheet = None
+    
+    if r_id == "round_32_16":
+        if match_idx < 16:
+            sh_name = "16"
+            row_in_sheet = match_idx + 1
+        else:
+            sh_name = "8"
+            row_in_sheet = (match_idx - 16) + 1
+    elif r_id == "quarters":
+        sh_name = "4"
         row_in_sheet = match_idx + 1
+    elif r_id == "semis_3rd":
+        sh_name = "2"
+        row_in_sheet = match_idx + 1
+    elif r_id == "final":
+        sh_name = "1"
+        row_in_sheet = match_idx + 1
+        
+    if sh_name and sh_name in player_wb.sheetnames:
+        ws = player_wb[sh_name]
         hg = _cell(ws, row_in_sheet, 2) # Column B is 2
         ag = _cell(ws, row_in_sheet, 3) # Column C is 3
         return hg, ag

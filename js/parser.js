@@ -133,22 +133,29 @@ export function parseWorkbook(buffer, fallbackName = '?') {
 
   const rounds = {};
   for (const [key, cfg] of Object.entries(ROUNDS_CONFIG)) {
-    // If player workbook does NOT contain the specific sheet name, we leave it empty!
-    // Except if it is master (playerName === 'master' or fallbackName === 'master' or has 'master' in fallbackName)
     const isMaster = fallbackName.toLowerCase().includes('master');
-    const ws_round = isMaster ? (wb.Sheets[cfg.sheetName] || ws) : wb.Sheets[cfg.sheetName];
-    
-    if (ws_round) {
-      if (isMaster) {
-        rounds[key] = parseKnockoutRound(ws_round, cfg.rows);
-      } else {
-        rounds[key] = parseKnockoutRoundCustom(ws_round, cfg.rows.length);
-      }
+    if (isMaster) {
+      // Master is always in WORLDCUP sheet, standard rows
+      rounds[key] = parseKnockoutRound(ws, cfg.rows);
     } else {
-      rounds[key] = cfg.rows.map(() => ({
-        home: '?', away: '?',
-        homeGoals: null, awayGoals: null
-      }));
+      // Player custom sheets
+      if (key === 'round_32_16') {
+        // First 16 matches from sheet '16'
+        const matches16 = wb.Sheets['16'] ? parseKnockoutRoundCustom(wb.Sheets['16'], 16) : Array(16).fill(null).map(() => ({ home: '?', away: '?', homeGoals: null, awayGoals: null }));
+        // Next 8 matches from sheet '8'
+        const matches8 = wb.Sheets['8'] ? parseKnockoutRoundCustom(wb.Sheets['8'], 8) : Array(8).fill(null).map(() => ({ home: '?', away: '?', homeGoals: null, awayGoals: null }));
+        rounds[key] = matches16.concat(matches8);
+      } else {
+        const ws_round = wb.Sheets[cfg.sheetName];
+        if (ws_round) {
+          rounds[key] = parseKnockoutRoundCustom(ws_round, cfg.rows.length);
+        } else {
+          rounds[key] = cfg.rows.map(() => ({
+            home: '?', away: '?',
+            homeGoals: null, awayGoals: null
+          }));
+        }
+      }
     }
   }
 
