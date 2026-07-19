@@ -26,21 +26,6 @@ export const TEAM_CODE = {
   'T\u00fanez': 'TUN', 'Uruguay': 'URU', 'Uzbekist\u00e1n': 'UZB',
 };
 
-const MATCH_MAP = {
-  // Dieciseisavos (D1-D16)
-  '73': 'D1',  '76': 'D2',  '74': 'D3',  '75': 'D4',
-  '78': 'D5',  '77': 'D6',  '79': 'D7',  '80': 'D8',
-  '82': 'D9',  '81': 'D10', '84': 'D11', '83': 'D12',
-  '85': 'D13', '88': 'D14', '86': 'D15', '87': 'D16',
-  // Octavos (O1-O8)
-  '90': 'O1',  '89': 'O2',  '91': 'O3',  '92': 'O4',
-  '93': 'O5',  '94': 'O6',  '95': 'O7',  '96': 'O8',
-  // Cuartos (C1-C4)
-  '97': 'C1',  '98': 'C2',  '99': 'C3',  '100': 'C4',
-  // Semis (S1-S2)
-  '101': 'S1', '102': 'S2'
-};
-
 function formatTeamName(name) {
   if (!name) return '?';
   const prefix = name.substring(0, 1);
@@ -547,8 +532,12 @@ function getPlayerRoundStats(p, roundId) {
 }
 
 export function renderWelcome(players, activeRoundId = 'groups') {
-  // Sort players by total cumulative points descending
-  const sortedPlayers = [...players].sort((a, b) => {
+  // Separate forfeited players from active ones
+  const activePlayers = players.filter(p => p.forfeited !== true);
+  const forfeitedPlayers = players.filter(p => p.forfeited === true);
+
+  // Sort active players by total cumulative points descending
+  activePlayers.sort((a, b) => {
     const ptsA = a.totalPoints || 0;
     const ptsB = b.totalPoints || 0;
     if (ptsB !== ptsA) return ptsB - ptsA;
@@ -560,6 +549,9 @@ export function renderWelcome(players, activeRoundId = 'groups') {
     if (countsB.wrong_one_goal !== countsA.wrong_one_goal) return countsB.wrong_one_goal - countsA.wrong_one_goal;
     return a.displayName.localeCompare(b.displayName);
   });
+
+  // Recombine arrays to place forfeited ones at the absolute bottom
+  const sortedPlayers = [...activePlayers, ...forfeitedPlayers];
 
   const MEDALS = [
     '<span class="inline-flex w-5 h-5 rounded-full bg-yellow-400 text-yellow-900 text-[10px] font-black items-center justify-center">1</span>',
@@ -578,48 +570,62 @@ export function renderWelcome(players, activeRoundId = 'groups') {
     'bg-red-50/60',
     'bg-red-50/60',
   ];
-  const lastIdx = sortedPlayers.length - 1;
+  
+  const lastActiveIdx = activePlayers.length - 1;
 
   const rows = sortedPlayers.map((p, idx) => {
     const stats   = getPlayerRoundStats(p, activeRoundId);
     const c       = stats.counts;
     const pts     = p.totalPoints ?? '\u2014';
-    const fromBot = lastIdx - idx;
-    const bot3    = fromBot <= 2;
-    const top5    = idx <= 4;
-    const top3    = idx <= 2;
 
-    let badge = '';
-    if (top3) {
-      badge = MEDALS[idx];
-    } else if (idx === 3 || idx === 4) {
-      badge = `<span class="inline-flex w-5 h-5 rounded-full bg-teal-500 text-white text-[10px] font-black items-center justify-center">${idx + 1}</span>`;
-    } else if (bot3) {
-      if (fromBot === 0) {
-        badge = `<span class="inline-flex flex-col items-center leading-none"><span class="text-gray-600 text-[10px] font-semibold">${idx + 1}</span><span class="text-[10px]">\uD83D\uDCA9</span></span>`;
-      } else {
-        badge = `<span class="inline-flex w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black items-center justify-center">${idx + 1}</span>`;
+    let rowCls = 'bg-white';
+    let rank = '';
+
+    if (p.forfeited === true) {
+      // Forfeited styling: greyed out, at the bottom, no numeric rank
+      rowCls = 'bg-gray-100/70 text-gray-400 italic';
+      rank = '<span class="text-gray-400 text-[10px] font-bold">R</span>';
+    } else {
+      // Active player styling based on active index
+      const fromBot = lastActiveIdx - idx;
+      const bot3    = fromBot <= 2;
+      const top3    = idx <= 2;
+
+      rowCls = bot3 ? DANGER_ROW[fromBot] : (ROW_CLS[idx] ?? 'bg-white');
+
+      let badge = '';
+      if (top3) {
+        badge = MEDALS[idx];
+      } else if (idx === 3 || idx === 4) {
+        badge = `<span class="inline-flex w-5 h-5 rounded-full bg-teal-500 text-white text-[10px] font-black items-center justify-center">${idx + 1}</span>`;
+      } else if (bot3) {
+        if (fromBot === 0) {
+          badge = `<span class="inline-flex flex-col items-center leading-none"><span class="text-gray-600 text-[10px] font-semibold">${idx + 1}</span><span class="text-[10px]">\uD83D\uDCA9</span></span>`;
+        } else {
+          badge = `<span class="inline-flex w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black items-center justify-center">${idx + 1}</span>`;
+        }
       }
+
+      rank = badge
+        ? `<span class="inline-flex items-center gap-0.5 leading-none">${badge}</span>`
+        : `<span class="text-gray-400 text-[11px]">${idx + 1}</span>`;
     }
 
-    const rowCls = bot3 ? DANGER_ROW[fromBot] : (ROW_CLS[idx] ?? 'bg-white');
-    const rank   = badge
-      ? `<span class="inline-flex items-center gap-0.5 leading-none">${badge}</span>`
-      : `<span class="text-gray-400 text-[11px]">${idx + 1}</span>`;
-
     let mov = '<span class="text-gray-300 text-xs">&mdash;</span>';
-    const hist = p.positionHistory ?? [];
-    const prevPos = hist.length >= 2 ? hist[hist.length - 2] : null;
-    if (prevPos != null) {
-      const diff = prevPos - p.position;
-      if (diff > 0) {
-        mov = `<span class="inline-flex items-center gap-0.5 text-green-600 text-xs font-bold">
-                 <span>&#8593;</span><span>${diff}</span>
-               </span>`;
-      } else if (diff < 0) {
-        mov = `<span class="inline-flex items-center gap-0.5 text-red-500 text-xs font-bold">
-                 <span>&#8595;</span><span>${Math.abs(diff)}</span>
-               </span>`;
+    if (p.forfeited !== true) {
+      const hist = p.positionHistory ?? [];
+      const prevPos = hist.length >= 2 ? hist[hist.length - 2] : null;
+      if (prevPos != null) {
+        const diff = prevPos - p.position;
+        if (diff > 0) {
+          mov = `<span class="inline-flex items-center gap-0.5 text-green-600 text-xs font-bold">
+                   <span>&#8593;</span><span>${diff}</span>
+                 </span>`;
+        } else if (diff < 0) {
+          mov = `<span class="inline-flex items-center gap-0.5 text-red-500 text-xs font-bold">
+                   <span>&#8595;</span><span>${Math.abs(diff)}</span>
+                 </span>`;
+        }
       }
     }
 
@@ -641,11 +647,11 @@ export function renderWelcome(players, activeRoundId = 'groups') {
       </tr>`;
   }).join('');
 
-  // Copy-to-clipboard text
+  // Copy-to-clipboard text (EXCLUDES forfeited players)
   const stripQuotes = name => name.replace(/"[^"]*"/g, '').replace(/\s+/g, ' ').trim();
-  const lastIdx2 = sortedPlayers.length - 1;
-  const copyText = sortedPlayers.map((p, i) => {
-    const fromBot = lastIdx2 - i;
+  const lastActiveIdx2 = activePlayers.length - 1;
+  const copyText = activePlayers.map((p, i) => {
+    const fromBot = lastActiveIdx2 - i;
     let prefix = '';
     if      (i === 0)       prefix = '\uD83C\uDFC6 ';
     else if (i <= 2)        prefix = '\uD83D\uDFE2';
@@ -663,7 +669,7 @@ export function renderWelcome(players, activeRoundId = 'groups') {
     <div class="bg-gradient-to-br from-green-800 to-green-600 rounded-2xl p-5 md:p-7 text-white shadow-lg mb-6">
       <p class="text-green-300 text-xs uppercase tracking-widest font-semibold mb-1">Quiniela Mundial 2026</p>
       <h1 class="text-2xl md:text-3xl font-extrabold mb-1">Clasificación General</h1>
-      <p class="text-green-300 text-sm">${sortedPlayers.length} participantes</p>
+      <p class="text-green-300 text-sm">${activePlayers.length} participantes</p>
     </div>
 
     <div class="max-w-2xl mx-auto">
